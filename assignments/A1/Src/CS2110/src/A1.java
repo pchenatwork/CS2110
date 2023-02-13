@@ -197,6 +197,10 @@ public class A1 {
     // printing a result.
     public static void main(String[] args)
     {
+        int age = 20;
+        assert age <= 18; //  : "Cannot Vote";
+        System.out.println("The voter's age is " + age);
+
         // double polygonArea(int nSides, double sideLength) 
         int nSides = 6;
         double sideLength = 10;
