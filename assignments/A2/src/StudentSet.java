@@ -1,4 +1,4 @@
-package cs2110;
+//package cs2110;
 
 /**
  * A mutable set of students.
@@ -41,7 +41,8 @@ public class StudentSet {
         }
 
         // Check that unused capacity is all null
-        for (int i = size; i < store.length; ++i) {
+        for (int i = size; i < store.length; ++i) {  //*####*  ++i vs i++ ?? pre-increment vs post-increment *####*
+       // for (int i = size; i < store.length; ++i) {  //*####*  ++i vs i++ ?? pre-increment vs post-increment *####*
             assert store[i] == null;
         }
     }
@@ -60,7 +61,7 @@ public class StudentSet {
 
         // throw new UnsupportedOperationException();
 
-        store = new Student[20];
+        store = new Student[3];
         size = 0;
         assertInv();
     }
@@ -95,6 +96,8 @@ public class StudentSet {
         // throw new UnsupportedOperationException();
         
         // Step 1:  Make sure student 's' doesn't exists yet;
+        if (contains(s))
+            throw new UnsupportedOperationException("Student '" + s.toString() + "'' already exists!");
         assert !contains(s) : "Student '" + s.toString() + "'' already exists!";  // ?? Should we use Exception ??
 
         // Step 2: Make sure store[] is not full, if so increase store[]
@@ -104,7 +107,7 @@ public class StudentSet {
         store[size] = s;
 
         // Step 4: increase Size by 1
-        size++;
+        size++;         
     }
 
     /**
@@ -112,10 +115,14 @@ public class StudentSet {
      */
     private void increaseStorage(){
         int iNewSize = store.length * 2;
-        var temp = new Student[iNewSize];
+
+        // Create a new Student array with double the size
+        var temp = new Student[iNewSize]; 
+        // Copy students to new storage
         for(int i = 0; i<size; i++){
             temp[i] = store[i];
         }
+        // Pointing the internal storage to new student array
         store = temp;
     }
 
@@ -127,7 +134,8 @@ public class StudentSet {
         // throw new UnsupportedOperationException();
         boolean bFound = false; // assume not found
         for(int i = 0; i<size; i++){
-            if (store[i].toString().equals(s.toString())){
+             //* ### */  if (store[i].equals(s)){ /* ### ?? This doesn't work ????? */
+             if (store[i].toString().equals(s.toString())){
                 bFound = true; break; 
             }
         }
@@ -144,6 +152,9 @@ public class StudentSet {
         // "helper methods", which you may define below.
         // throw new UnsupportedOperationException();
         boolean bOK = false; // Assume failure
+        if (!this.contains(s))
+            return bOK;
+
         for(int i = 0; i<size; i++){
             if (store[i].toString().equals(s.toString())){
                 // Student 's' is located in store[]

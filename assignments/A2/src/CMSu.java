@@ -1,4 +1,4 @@
-package cs2110;
+//package cs2110;
 
 import java.io.PrintStream;
 
@@ -12,7 +12,6 @@ import java.io.PrintStream;
  * An instance of a Course Management System tracking course enrollment for a single semester.
  */
 public class CMSu {
-
     /**
      * List of all the courses managed by this Course Management System (CMS).  The index of a
      * course in the array is used as unique public identifier.  Only the first `nCourses` elements
@@ -140,7 +139,30 @@ public class CMSu {
      */
     public boolean hasConflict(Student student) {
         // TODO 24: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
+
+        var myCourses = new Course[nCourses];
+        int index = 0;  // # of course 'student' is enrolled
+
+        // find courses and stored in myCourses
+        for(int i = 0; i< nCourses; i++ ){
+            if (courses[i].hasStudent(student)){
+                myCourses[index] = courses[i];
+                index++;
+            }
+        }
+        if (index<=1) return false; // No conflict if 'student' only enroll in 1 course
+
+        // Using bubble sort logic to compare every pair of courses in MyCourses array to verify overlaps
+        boolean bOK = false; // Assume no conflict
+        for (int i = 0; i< index; i++){
+            for(int j = i+1; j<index; j++){
+                if (myCourses[i].overlaps(myCourses[j])){
+                    bOK = true; break;
+                }
+            }
+        }
+        return bOK;
     }
 
     /**
@@ -149,7 +171,14 @@ public class CMSu {
      */
     public StudentSet auditCredits(int creditLimit) {
         // TODO 25: Implement this method according to its specification
-        throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
+        var myStudentSet = new StudentSet();
+        for (int i = 0; i<nStudents; i++){
+            if (students[i].Credits()>creditLimit){
+                myStudentSet.add(students[i]);
+            }
+        }
+        return myStudentSet;
     }
 
     /**
@@ -161,7 +190,16 @@ public class CMSu {
      */
     public boolean checkCreditConsistency() {
         // TODO 26: Implement this method according to its specification
-        throw new UnsupportedOperationException();
-    }
+        // throw new UnsupportedOperationException();
+        int sumStudentCredits = 0;
+        for (int i = 0; i<nStudents; i++){
+            sumStudentCredits += students[i].Credits();
+        }
 
+        int sumCourseCredits = 0;
+        for(int j=0; j<nCourses; j++){
+            sumCourseCredits += courses[j].StudentCount() * courses[j].credits();
+        }
+        return sumStudentCredits == sumCourseCredits;
+    }
 }

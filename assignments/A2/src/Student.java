@@ -1,4 +1,4 @@
-package cs2110;
+//package cs2110;
 
 /**
  * A student tracked by the CMSμ course management system.
@@ -19,8 +19,8 @@ public class Student {
     // Reminder: You should delete this comment block after completing the TODO.  You are welcome to
     // borrow text from it when writing your field specifications, however.
 
-    private final string _firstName;  /* final to make this field immutable */
-    private final string _lastName;  /* final */
+    private final String _firstName;  /* final to make this field immutable */
+    private final String _lastName;  /* final */
     private int _credits;
 
     
@@ -54,6 +54,7 @@ public class Student {
         // explicitly.
         assert (_firstName !=null && _firstName.trim().length() > 0 ) : "First name of the student is empty.";
         assert (_lastName  !=null && _lastName.trim().length()>0 ) : "Last name of the student is empty.";
+        assert (_credits >= 0) : "Credit can not be negative";
         //throw new UnsupportedOperationException();
     }
 
@@ -127,17 +128,23 @@ public class Student {
         // Assert that all preconditions are met.
         // Assert that the class invariant is satisfied before returning.
         // throw new UnsupportedOperationException();
-        if ((_credits + deltaCredits) < 0)
-            throw new Exception("The change would cause the student's credits to become negative.");
-        //?? assert (_credits + deltaCredits) >=0 : "The change would cause the student's credits to become negative."; 
+        /// if ((_credits + deltaCredits) < 0)
+        ///    throw new Exception("The change would cause the student's credits to become negative.");
+        assert (_credits + deltaCredits) >=0 : "The change would cause the student's credits to become negative."; 
         _credits = credits() + deltaCredits;
     }
 
     /**
      * Return the full name of this student as its string representation.
      */
+    
     @Override
     public String toString() {
         return fullName();
     }
+    @Override
+    public int hashCode() {
+        return 1;
+    }
+    
 }

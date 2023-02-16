@@ -1,4 +1,6 @@
-package cs2110;
+import java.security.InvalidParameterException;
+
+//package cs2110;
 
 /**
  * A course managed by the CMSμ course management system.  Courses are assumed to meet every day of
@@ -51,14 +53,17 @@ public class Course {
     private void assertInv() {
         // TODO 15: Implement this method by asserting the invariants specified above.
         if (title==null || title.trim().length()==0 )
-            throw new InvalidInputException("Title of the course is empty.");
+            throw new InvalidParameterException("Title of the course is empty.");
         if (credits < 0)
-            throw new InvalidInputException("Credit is negative.");
+            throw new InvalidParameterException("Credit is negative.");
         if (prof==null || prof.trim().length()==0)
-            throw new InvalidInputException("Name of the professor is empty.");
-
-        /// .... to be finished 
-        throw new UnsupportedOperationException();
+            throw new InvalidParameterException("Name of the professor is empty.");
+        if (location==null || location.trim().length()==0)
+            throw new InvalidParameterException("Name of the professor is empty.");
+        if (startTimeMin <0 || startTimeMin >= 1440)
+            throw new InvalidParameterException("Start time of this course's daily meetings must be between 0 and 1439");
+        if (durationMin < 1 || startTimeMin + durationMin >= 1440) /* ### */
+            throw new InvalidParameterException("Start time + Duration of this course's daily meetings is over 24hrs");
     }
 
     /**
@@ -125,12 +130,11 @@ public class Course {
      */
     public String formatStartTime() {
         // TODO 18
+        //throw new UnsupportedOperationException();
         int hr = startTimeMin/60;
         int min = startTimeMin % 60;
-        string postfix = hr > 12? " PM" : " AM";
-        return String.valueOf(hr) + ":" + (min<10 ? ("0" + String.valueOf(min)) : String.valueOf(min)) + postfix;
-
-        //throw new UnsupportedOperationException();
+        String postfix = hr > 12? " PM" : " AM";
+        return String.valueOf(hr > 12 ? (hr-12) : 12) + ":" + (min<10 ? ("0" + String.valueOf(min)) : String.valueOf(min)) + postfix;
     }
 
     /**
@@ -148,7 +152,7 @@ public class Course {
         //throw new UnsupportedOperationException();
         int s1 = this.startTimeMin, e1 = this.startTimeMin+ this.durationMin;
         int s2 = course.startTimeMin, e2 = course.startTimeMin+ course.durationMin;
-        return (s2 >=s1 && s2< e1) || (e2>s1 && e2<e1 ) || (s2 <=s1 && e2>-e1); 
+        return (s2 >=s1 && s2< e1) || (e2>s1 && e2<e1 ) || (s2 <=s1 && e2>e1); 
     }
 
     /**
@@ -158,6 +162,14 @@ public class Course {
         // TODO 20
         //throw new UnsupportedOperationException();
         return students.contains(student);
+    }
+    
+    /**
+     * Return the count of students enrolled in the course
+     * Note: introduced to be used for checkCreditConsistency() in CMSu class
+     */
+    public int StudentCount() {
+        return students.size();
     }
 
     /**
