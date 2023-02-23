@@ -1,4 +1,6 @@
 package cs2110;
+
+import cs2110.*;
 import static org.junit.Assert.assertEquals;
 import org.junit.*;
 
@@ -36,10 +38,22 @@ public class _MyTest {
         // * Need to cast integer to Integer *
         // **  assertEquals(n1.data(), 111);  // https://stackoverflow.com/questions/8660691/what-is-the-difference-between-integer-and-int-in-java
         assertEquals(n1.data(), (Integer)111); 
+        assertEquals(n2.data(), "S1"); 
 
         //assertEquals(n1, n1.next()); 
         n1.setNext(n1);
         assertEquals(n1, n1.next()); 
         assertEquals(n1.data(), n1.next().data()); 
     } 
+
+    @Test
+    public void LinkedSeqTest(){
+        var lst = new LinkedSeq<String>();
+
+        assertEquals(lst.size(), 0);
+        Node<String> n2 = new Node<String>("S1", null);
+
+        assertEquals(n2, n2);
+        
+    }
 }

@@ -3,6 +3,8 @@ package cs2110;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import javax.swing.Icon;
+
 /*
  * Assignment metadata
  * Name(s) and NetID(s): TODO (TODO)
@@ -45,6 +47,14 @@ public class LinkedSeq<T> implements Seq<T> {
 
             // TODO 0: check that the number of linked nodes is equal to this list's size and that
             // the last linked node is the same object as `tail`.
+            var temp = head; int iCount = 0;
+            while(temp.next()!=null){
+                temp = temp.next();
+                iCount++;
+            }
+            assert temp == tail;
+            assert size == iCount;
+            // End of To Do 0
         }
     }
 
@@ -69,7 +79,7 @@ public class LinkedSeq<T> implements Seq<T> {
         assertInv();
         assert elem != null;
 
-        head = new Node<>(elem, head);
+        head = new Node<T>(elem, head);
         // If list was empty, assign tail as well
         if (tail == null) {
             tail = head;
@@ -105,7 +115,27 @@ public class LinkedSeq<T> implements Seq<T> {
         // TODO 2: Write unit tests for this method, then implement it according to its
         // specification.  Tests must check for `elem` in a list that does not contain `elem`, in a
         // list that contains it once, and in a list that contains it more than once.
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
+
+        // Step 1: Assert a valid variant
+        assertInv();
+
+        /** implementation 1 **/
+        // Empty list, return not contain
+        if (head==null) return false;
+
+        // using temp as a running pointer, pointing to 'head' first
+        var temp = head;
+        while (temp.next() != null) {
+            // when temp is not pointing to the 'tail'
+            if (temp.data().equals(elem)) return true;
+            temp = temp.next();
+        }
+        // Now temp is pointing to tail
+        if (temp.data().equals(elem)) return true;
+        /**** End of Implementation 1 ****/
+        
+        return false;
     }
 
     @Override
@@ -156,14 +186,30 @@ public class LinkedSeq<T> implements Seq<T> {
         // type returned by `currNodeOther.data()` is `Object`.
         if (!(other instanceof LinkedSeq)) {
             return false;
-        }
+        }   
+
         LinkedSeq otherSeq = (LinkedSeq) other;
         Node<T> currNodeThis = head;
         Node currNodeOther = otherSeq.head;
 
+        boolean bEqual = true;
+
+        for (int i = 0; i<size; i++){
+            if (! currNodeThis.data().equals(currNodeOther.data())) {
+                bEqual = false;
+                break;
+            }
+            
+            currNodeThis = currNodeThis.next();
+            currNodeOther = currNodeOther.next();
+        }
+
+        /******
         // TODO 7: Write unit tests for this method, then finish implementing it according to its
         // specification.  Tests must compare at least three different pairs of lists.
         throw new UnsupportedOperationException();
+        *****/
+        return bEqual;
     }
 
     /*
@@ -197,7 +243,7 @@ public class LinkedSeq<T> implements Seq<T> {
 
         // Return an instance of an anonymous inner class implementing the Iterator interface.
         // For convenience, this uses Java features that have not eyt been introduced in the course.
-        return new Iterator<>() {
+        return new Iterator<T>() {
             private Node<T> next = head;
 
             public T next() throws NoSuchElementException {

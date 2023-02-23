@@ -19,7 +19,7 @@ public class Node<T> {
      * Create a Node containing element `elem` and pointing to successor node `successor` (may be
      * null).
      */
-    Node(T elem, Node<T> successor) {
+    public Node(T elem, Node<T> successor) {
         data = elem;
         next = successor;
     }
