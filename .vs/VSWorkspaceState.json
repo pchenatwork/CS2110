@@ -2,10 +2,14 @@
   "ExpandedNodes": [
     "",
     "\\assignments",
-    "\\assignments\\A2",
     "\\assignments\\A2\\src",
+    "\\assignments\\A2\\src\\CS2110",
+    "\\assignments\\A2\\src\\CS2110\\bin",
+    "\\assignments\\A2\\src\\CS2110\\src",
+    "\\assignments\\A2\\src\\CS2110\\src\\cs2110",
+    "\\assignments\\A3_P",
+    "\\assignments\\A3_P\\src",
     "\\Misc"
   ],
-  "SelectedNode": "\\assignments\\A2\\src\\StudentSet.java",
   "PreviewInSolutionExplorer": false
 }

@@ -1,0 +1,13 @@
+** TDD ** https://www.freecodecamp.org/news/tdd-explanation-hands-on-practice-with-c-a0124338be44/
+
+
+
+** Generic in Java,   https://www.geeksforgeeks.org/generics-in-java/   ** Needs to go over the chapter **
+Generics means parameterized types. The idea is to allow type (Integer, String, … etc., and user-defined types) to be a parameter to methods, classes, and interfaces. 
+
+The Object is the superclass of all other classes, and Object reference can refer to any object.
+
+** Iterator interface in Java **
+https://www.geeksforgeeks.org/java-implementing-iterator-and-iterable-interface/
+
+
