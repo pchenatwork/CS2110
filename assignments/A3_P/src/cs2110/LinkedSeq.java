@@ -3,7 +3,6 @@ package cs2110;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import javax.swing.Icon;
 
 /*
  * Assignment metadata
