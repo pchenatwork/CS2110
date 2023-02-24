@@ -49,11 +49,23 @@ public class _MyTest {
     @Test
     public void LinkedSeqTest(){
         var lst = new LinkedSeq<String>();
-
         assertEquals(lst.size(), 0);
-        Node<String> n2 = new Node<String>("S1", null);
+        System.out.println("list is empty => " + lst.toString()); // ToDo1 toString() test
 
-        assertEquals(n2, n2);
-        
+        // ToDo2 contains() test
+        // Test Case 1: null element is not allowed
+        assertEquals(lst.contains(null), false);
+        // Test case 2: 
+        lst.append("s1");
+        System.out.println("Should be [s1], actual  " + lst.toString());
+        assertEquals(lst.size(), 1);
+
+        lst.prepend("");        
+        System.out.println("Should be [, s1], actual  " + lst.toString());
+        assertEquals(lst.get(2), "s1");
+        System.out.println("get(2) shoulbe be 's1', actual  " + lst.get(2));
+
+        assertEquals(lst.contains("s1"), true);
+        assertEquals(lst.contains("S1"), false);
     }
 }

@@ -46,7 +46,8 @@ public class LinkedSeq<T> implements Seq<T> {
 
             // TODO 0: check that the number of linked nodes is equal to this list's size and that
             // the last linked node is the same object as `tail`.
-            var temp = head; int iCount = 0;
+            var temp = head; 
+            int iCount = head==null? 0 : 1;  /** PCHEN Explain ** */
             while(temp.next()!=null){
                 temp = temp.next();
                 iCount++;
@@ -76,7 +77,18 @@ public class LinkedSeq<T> implements Seq<T> {
     @Override
     public void prepend(T elem) {
         assertInv();
+        //** make sure not a 'null' value */
         assert elem != null;
+
+        /** check list first
+         * if empty, head=tail=newHead
+         * if not empty , head = newHead
+        if (size==0){
+            head = tail = new Node<T>(elem, null);
+        } else {
+            head = new Node<T>(elem, head); /*** nees explaination **** /
+        }
+         */
 
         head = new Node<T>(elem, head);
         // If list was empty, assign tail as well
@@ -105,6 +117,16 @@ public class LinkedSeq<T> implements Seq<T> {
         String str = "[";
         // TODO 1: Complete the implementation of this method according to its specification.
         // Unit tests have already been provided (you do not need to add additional cases).
+        String seperator = ", ";
+        StringBuilder sb = new StringBuilder();
+        Node<T> temp = head;
+        for (int i = 0; i<size; i++){
+            sb.append(temp.data().toString());
+            sb.append(temp.next()==null? "" : seperator);
+            temp = temp.next();
+        }
+        // remove the trailing 'seperator' from
+        str += sb.toString();
         str += "]";
         return str;
     }
@@ -141,15 +163,43 @@ public class LinkedSeq<T> implements Seq<T> {
     public T get(int index) {
         // TODO 3: Write unit tests for this method, then implement it according to its
         // specification.  Tests must get elements from at least three different indices.
-        throw new UnsupportedOperationException();
+
+        /** PCHEN **
+         * step 1: condition check, index is between [1 ~ size]
+         * **/
+        if (index<1 || index > size)
+            throw new UnsupportedOperationException("index is out of bounds");
+                    
+        var temp = head; 
+        for (int i = 2; i<=index; i++){ // ??? Why start from i=2 ???
+            temp = temp.next();
+        }
+        return temp.data();
     }
 
     @Override
     public void append(T elem) {
         // TODO 4: Write unit tests for this method, then implement it according to its
         // specification.  Tests must append to lists of at least three different sizes.
-        // Implementation constraint: efficiency must not depend on the size of the list.
-        throw new UnsupportedOperationException();
+        // Implementation constraint: efficiency must not depend on the size of the list. (PCHEN ???? explain)
+        // throw new UnsupportedOperationException();
+
+        assert elem != null; // Make sure no 'null' value
+
+        var newtail = new Node<T>(elem, null);
+        /** PCHEN Note:
+         *  IF seq is empty ( head == tail == null) : append == set header
+         *  ELSE set newtail
+         * **/
+        if (head == null){
+            head = tail = newtail; // ****
+        } else {
+            // ** PCHEN: it would be helpful to show in diagram **
+            tail.setNext(newtail);
+            tail = newtail;
+        }
+        // increase the size
+        size++;
     }
 
     @Override
@@ -159,6 +209,11 @@ public class LinkedSeq<T> implements Seq<T> {
         // TODO 5: Write unit tests for this method, then implement it according to its
         // specification.  Tests must insert into lists where `successor` is in at least three
         // different positions.
+        /** PCHEN Note ** 
+         * 1 : Successor is 'head'
+         * 2 : Successor is 'tail'
+         * 3 : Successor is 'in the middle'
+         * ****/
         throw new UnsupportedOperationException();
     }
 

@@ -5,12 +5,12 @@
     "\\assignments\\A1",
     "\\assignments\\A1\\Src",
     "\\assignments\\A1\\Src\\CS2110",
-    "\\assignments\\A1\\Src\\CS2110\\bin",
     "\\assignments\\A1\\Src\\CS2110\\lib",
     "\\assignments\\A1\\Src\\CS2110\\src",
     "\\assignments\\A3_P",
-    "\\assignments\\A3_P\\src"
+    "\\assignments\\A3_P\\src",
+    "\\assignments\\A3_P\\src\\cs2110"
   ],
-  "SelectedNode": "\\assignments\\A2\\src",
+  "SelectedNode": "\\assignments\\A3_P\\src\\cs2110\\StudentSet.java",
   "PreviewInSolutionExplorer": false
 }
