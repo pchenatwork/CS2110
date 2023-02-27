@@ -1,3 +1,37 @@
 .vs/**
 **/bin/**
 **/lib/**
+/assignments/A3_X/tests/non-rectangular.csv
+/assignments/A3_X/tests/no-cols.csv
+/assignments/A3_X/tests/input2.csv
+/assignments/A3_X/tests/empty.csv
+/assignments/A3_X/src/cs2110/_MyTest.java
+/assignments/A3_X/src/cs2110/StudentSet.java
+/assignments/A3_X/src/cs2110/Student.java
+/assignments/A3_X/src/cs2110/Seq.java
+/assignments/A3_X/src/cs2110/Node.java
+/assignments/A3_X/src/cs2110/LinkedSeqTest.java
+/assignments/A3_X/src/cs2110/LinkedSeq.java
+/assignments/A3_X/src/cs2110/CsvJoinTest.java
+/assignments/A3_X/src/cs2110/CsvJoin.java
+/assignments/A3_X/src/cs2110/Course.java
+/assignments/A3_X/src/cs2110/CMSu.java
+/assignments/A3_X/src/App.java
+/assignments/A3_X/README.md
+/assignments/A3_X/Note.txt
+/assignments/A3_X/Assignment 3.docx
+/assignments/A3_X/.vscode/settings.json
+/assignments/A3_S/src/cs2110/_MyTest.java
+/assignments/A3_S/src/cs2110/StudentSet.java
+/assignments/A3_S/src/cs2110/Student.java
+/assignments/A3_S/src/cs2110/Seq.java
+/assignments/A3_S/src/cs2110/Node.java
+/assignments/A3_S/src/cs2110/LinkedSeqTest.java
+/assignments/A3_S/src/cs2110/LinkedSeq.java
+/assignments/A3_S/src/cs2110/Course.java
+/assignments/A3_S/src/cs2110/CMSu.java
+/assignments/A3_S/src/App.java
+/assignments/A3_S/README.md
+/assignments/A3_S/Note.txt
+/assignments/A3_S/Assignment 3.docx
+/assignments/A3_S/.vscode/settings.json
