@@ -42,23 +42,7 @@ public class LinkedSeq<T> implements Seq<T> {
         } else {
             assert head != null;
             assert tail != null;
-/*## Paul's note ## */
 
-            // TODO 0: check that the number of linked nodes is equal to this list's size and that
-            // the last linked node is the same object as `tail`.
-            var temp = head; 
-            int iCount = head==null? 0 : 1;  /** PCHEN Explain ** */
-            while(temp.next()!=null){
-                temp = temp.next();
-                iCount++;
-            }
-            assert temp == tail :  "assertInv() Fail: 'tail' doesn't match.";
-            assert tail.next() == null :  "assertInv() Fail: 'tail' is not pointing to 'null'.";
-            assert size == iCount :  "assertInv() Fail: 'count' doesn't match to 'size'.";
-            // End of To Do 0
-/*## End ## */
-
-            /* ## Stanley's implementation # can be optimized in Big(O)
             // Check that the number of linked nodes is equal to this list's size
             int count = 0;
             Node<T> curr = head;
@@ -66,15 +50,15 @@ public class LinkedSeq<T> implements Seq<T> {
                 count++;
                 curr = curr.next();
             }
-            assert count == size : "assertInv() Fail: 'count' doesn't match to 'size'.";
+            assert count == size;
 
             // Check that the last linked node is the same object as `tail`.
             curr = head;
             while (curr.next() != null) {
                 curr = curr.next();
             }
-            assert curr == tail : "assertInv() Fail: 'tail' doesn't match.";
- ## */
+            assert curr == tail;
+
             // TODO 0: check that the number of linked nodes is equal to this list's size and that
             // the last linked node is the same object as `tail`.
         }
@@ -127,20 +111,6 @@ public class LinkedSeq<T> implements Seq<T> {
     public String toString() {
         String str = "[";
         Node<T> curr = head;
-
-        /*## Paul's implementation */
-        StringBuilder sb = new StringBuilder();
-        while (curr != null){
-            sb.append(curr.data());
-            curr = curr.next();
-            if (curr != null) {
-                sb.append(", ");
-            }
-        }
-        str += sb.toString();
-        /* end of Paul's ##*/
-
-        /**## Stanley's implementation ##
         while (curr != null) {
             str += curr.data();
             curr = curr.next();
@@ -148,7 +118,6 @@ public class LinkedSeq<T> implements Seq<T> {
                 str += ", ";
             }
         }
-        ## **/
         // TODO 1: Complete the implementation of this method according to its specification.
         // Unit tests have already been provided (you do not need to add additional cases).
         str += "]";
@@ -180,7 +149,7 @@ public class LinkedSeq<T> implements Seq<T> {
         for (int i = 0; i < index; i++) {
             curr = curr.next();
         }
-        assertInv(); /**## no need to have assertInv() here for no data operation ##**/
+        assertInv();
         return curr.data();
         // TODO 3: Write unit tests for this method, then implement it according to its
         // specification.  Tests must get elements from at least three different indices.
@@ -190,15 +159,13 @@ public class LinkedSeq<T> implements Seq<T> {
     public void append(T elem) {
         Node<T> successor = new Node<>(elem, null);
         if (head == null) {
-            /*## ##head = successor; ##*/
-            head = tail = successor;
+            head = successor;
         } else {
             Node<T> curr = head;
             while (curr.next() != null) {
                 curr = curr.next();
             }
             curr.setNext(successor);
-            tail = successor; /**## You forgot to set tail after 'append()' ##*/
         }
         size++;
         // TODO 4: Write unit tests for this method, then implement it according to its
@@ -208,34 +175,6 @@ public class LinkedSeq<T> implements Seq<T> {
 
     @Override
     public void insertBefore(T elem, T successor) {
-        //## Paul's Implementation ## assertions check
-        assert contains(successor): "'Successor' does not exist."; /**## ##**/
-        assert elem != null : "'elem' can not be null."; 
-
-        // 'prev' is the Node before 'curr'
-        var curr = head; // ini 'curr' pointing to header.
-        Node<T> prev = null; // node before 'curr',  ini to null 
-        while (curr!=null) {
-            if (curr.data().equals(successor)){ 
-                // successor found. 
-                // creating 'NewNode' that is pointing to 'successor'
-                var myNewNode = new Node<T>(elem, curr);
-                // if curr is head (myNode is null), myNewNode becomes the new head
-                if (prev == null) {
-                    head = myNewNode;
-                } 
-                else {
-                    prev.setNext(myNewNode);
-                }    
-                size++; 
-                return;   // exit loop  
-            }
-            prev = curr;
-            curr = curr.next();
-        }
-        /** ## End of Paul's Implementation ## */
-
-        /** ## Stanley's implementation ##
         Node<T> newNode = new Node<>(elem, null);
         if (head == null) {
             throw new NoSuchElementException("The list is empty.");
@@ -255,9 +194,7 @@ public class LinkedSeq<T> implements Seq<T> {
             prev.setNext(newNode);
         }
         newNode.setNext(curr);
-
         size++;
-        ## */
         // Tip: Since there is a precondition that `successor` is in the list, you don't have to
         // handle the case of the empty list.  Asserting this precondition is optional.
         // TODO 5: Write unit tests for this method, then implement it according to its
@@ -267,38 +204,6 @@ public class LinkedSeq<T> implements Seq<T> {
 
     @Override
     public boolean remove(T elem) {
-        /* ### Paul's implementation ### */
-        // 'prev' is the Node before 'curr'
-        Node<T> prev = null; // node before 'curr',  ini to null 
-        Node<T> curr = head;// ini 'curr' pointing to header.
-        int iRemovedCount = 0;  
-        while (curr!=null) {
-            if (curr.data().equals(elem)){ 
-                // ** Node (curr) located **. 
-                // if curr is head (prev is null), reset head
-                // if curr is tail (curr.next90 == null), reset tail
-                // otherwise ....
-                if (curr == head || curr ==tail) {
-                    head = (curr == head) ? head.next() : head;
-                    if (curr == tail) {
-                        // set 'prev' as last node
-                        tail = prev;
-                        if (prev!=null) {
-                            tail.setNext(null);
-                        }                    
-                    }
-                } else {
-                    prev.setNext(curr.next());
-                }
-                iRemovedCount ++;
-                size--; 
-            }
-            prev = curr;
-            curr = curr.next();
-        }
-        return iRemovedCount>0;
-
-        /* ## Stanly's implementation ## has bug ##
         Node<T> prev = null;
         Node<T> curr = head;
         boolean removed = false;
@@ -317,7 +222,6 @@ public class LinkedSeq<T> implements Seq<T> {
             curr = curr.next();
         }
         return removed;
-        ## */
         // TODO 6: Write unit tests for this method, then implement it according to its
         // specification.  Tests must remove `elem` from a list that does not contain `elem`, from a
         // list that contains it once, and from a list that contains it more than once.

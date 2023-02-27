@@ -50,20 +50,43 @@ public class _MyTest {
     public void LinkedSeqTest(){
         var lst = new LinkedSeq<String>();
         assertEquals(lst.size(), 0);
-        System.out.println("list is empty => " + lst.toString()); // ToDo1 toString() test
+        System.out.println("new lst =  " + lst.toString()); // ToDo1 toString() test
 
         // ToDo2 contains() test
         // Test Case 1: null element is not allowed
         assertEquals(lst.contains(null), false);
         // Test case 2: 
         lst.append("s1");
-        System.out.println("Should be [s1], actual  " + lst.toString());
+        System.out.println("after append('s1') :   " + lst.toString());
         assertEquals(lst.size(), 1);
 
-        lst.prepend("");        
-        System.out.println("Should be [, s1], actual  " + lst.toString());
-        assertEquals(lst.get(2), "s1");
-        System.out.println("get(2) shoulbe be 's1', actual  " + lst.get(2));
+        lst.insertBefore("s0", "s1");
+        System.out.println("after inserBefore('s0', 's1')  " + lst.toString());
+        lst.insertBefore("s2", "s1");
+        System.out.println("after inserBefore('s2', 's1')  " + lst.toString());
+        
+        var x0 = lst.get(0);
+        var x2 = lst.get(1);
+        var x1 = lst.get(2);
+
+        lst.append("s2");
+        System.out.println("after append('s2') :   " + lst.toString());
+
+        lst.insertBefore("s20", "s2");
+        System.out.println("after inserBefore('s20', 's2')   " + lst.toString());
+
+        lst.prepend("s2");        
+        System.out.println("after prepend 's2':   " + lst.toString());
+
+        lst.remove("s1");
+        System.out.println("after remove 's1':   " + lst.toString());
+        lst.insertBefore("s1", "s0");
+        System.out.println("after inserBefore('s1', 's0')   " + lst.toString());
+
+
+
+//        assertEquals(lst.get(1), "s0");
+//        System.out.println("get(1) shoulbe be 's1', actual  " + lst.get(1));
 
         assertEquals(lst.contains("s1"), true);
         assertEquals(lst.contains("S1"), false);
