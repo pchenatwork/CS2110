@@ -5,9 +5,17 @@ Generics means parameterized types. The idea is to allow type (Integer, String, 
 
 The Object is the superclass of all other classes, and Object reference can refer to any object.
 
-** Iterator interface in Java **
-https://www.geeksforgeeks.org/java-implementing-iterator-and-iterable-interface/
-
 ** Linked List diagram **
 
-** StringBuilder **
+##
+
+** StringBuilder ** String s = null vs String s = "";
+
+
+** Iterator interface in Java ** enhanced for-loop **
+https://www.geeksforgeeks.org/java-implementing-iterator-and-iterable-interface/
+https://www.cs.cornell.edu/courses/JavaAndDS/iteratorIterable/01iterator.pdf 
+
+file IO
+https://www.cs.cornell.edu/courses/JavaAndDS/files/io1.pdf
+

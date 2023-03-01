@@ -56,9 +56,74 @@ public class CsvJoin {
         return file ;
         ## */
     }
+    /**
+     * Return the left outer join of tables `left` and `right`, joined on their first column. Result
+     * will represent a rectangular table, with empty strings filling in any columns from `right`
+     * when there is no match. Requires that `left` and `right` represent rectangular tables with at
+     * least 1 column.
+     */
+    public static Seq<Seq<String>> LeftJoin(Seq<Seq<String>> left, Seq<Seq<String>> right){
+        /** Condition check  **/
+        assertInputFile(left);
+        assertInputFile(right);       
+        
+        // line = Seq<String>
+        // file = Seq<line> = Seq<Seq<String>> 
+        Seq<Seq<String>> newFile = new LinkedSeq<Seq<String>>();
 
-    public static Seq<Seq<String>> join(Seq<Seq<String>> left, Seq<Seq<String>> right){
-       // Not implemented yet, return left just to be compilable. 
-        return left;
+        // making 'rightDummyLine' the same size as firstRow of 'right', and a value of "empty string"
+        // in case 'right line' is not found, we will use a dummy line to do left join
+        LinkedSeq<String> rightDummyLine = new LinkedSeq<>(); right.get(0);
+        for (var token: right.get(0)) {
+            rightDummyLine.append("");  
+        }
+
+        for(var leftLine : left) {
+            String key = leftLine.get(0); // Get line[0] as key (to matching value with right );
+            boolean bKeyFound = false ; // Assume key not found in 'right'
+            for (var rightLine : right){
+                if (rightLine.get(0).equals(key)){
+                    // key found in rightLine
+                    bKeyFound = true;   
+                    // use helper mergeLine() to merge 'leftLine' and 'rightLine'
+                    // and append to 'file'
+                    newFile.append(mergeLine(leftLine, rightLine));
+                }
+            }
+            if (!bKeyFound){
+                // if key not found in 'right', merge to a dummy rightLine                
+                newFile.append(mergeLine(leftLine, rightDummyLine));
+            }
+        }
+        return newFile;
+    }
+
+    private static void assertInputFile(Seq<Seq<String>> file)
+    {
+        // assert input at least 1 column
+        // assert input is rectangular
+        assert file != null && file.size() > 0 : "input file is null or empty."; 
+        int iMaxColCount = 0;
+        int iMinColCount = Integer.MAX_VALUE;
+        for (var row : file){  // enhanced for-loop
+            if (row.size() < iMinColCount) iMinColCount = row.size();
+            else if (row.size() > iMaxColCount) iMaxColCount = row.size();
+        }
+        assert iMinColCount == iMaxColCount : "input file is not rectangular.";
+        assert iMinColCount > 0 : "input file has empty row";
+    }
+    /* **
+     * Helper function to merger two LinkedSeq<>(left, right), skip right[0]
+     */
+    private static Seq<String> mergeLine(Seq<String> left, Seq<String> right){
+        var newLine = new LinkedSeq<String>();
+        for(var token : left){
+            newLine.append(token);
+        }
+        // index start from 1, skip [0] as it is assume key
+        for (int i = 1; i< right.size(); i++){
+            newLine.append(right.get(i));
+        }
+        return newLine;
     }
 }

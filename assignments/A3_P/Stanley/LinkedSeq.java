@@ -42,6 +42,8 @@ public class LinkedSeq<T> implements Seq<T> {
         } else {
             assert head != null;
             assert tail != null;
+            
+            /***## Stanley's implementation , this implementation big (O) = 2n ##
 
             // Check that the number of linked nodes is equal to this list's size
             int count = 0;
@@ -58,9 +60,21 @@ public class LinkedSeq<T> implements Seq<T> {
                 curr = curr.next();
             }
             assert curr == tail;
+            
+            ##****/
 
             // TODO 0: check that the number of linked nodes is equal to this list's size and that
             // the last linked node is the same object as `tail`.
+            
+            var curr = head; 
+            int iCount = head==null? 0 : 1;  /**## PCHEN Explain, this implementation Big(O) = n  ##**/
+            while(temp.next()!=null){
+                temp = temp.next();
+                iCount++;
+            }
+            assert curr == tail;
+            assert size == iCount;            
+            
         }
     }
 
@@ -109,6 +123,7 @@ public class LinkedSeq<T> implements Seq<T> {
      */
     @Override
     public String toString() {
+        /**## we can use StringBuilder ##**/
         String str = "[";
         Node<T> curr = head;
         while (curr != null) {
