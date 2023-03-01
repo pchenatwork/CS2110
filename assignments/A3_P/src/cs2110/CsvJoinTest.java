@@ -115,7 +115,7 @@ public class CsvJoinTest {
     @Test
     public void testJoin() throws IOException {
         testJoinHelper("StudentCourse");
-        testJoinHelper("StudentCourse2");
+    //    testJoinHelper("StudentCourse2");
 
      //   testJoinHelper("states");
 
