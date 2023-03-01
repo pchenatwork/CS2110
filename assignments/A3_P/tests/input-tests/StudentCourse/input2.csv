@@ -1,7 +1,7 @@
 netid, courseid, coursename
-NNN123, cs2110, Data Struture
-YYY456, cs2110, Data Structure
-abc123, cs2110, Data Structure
-YYY456, cs2112, Course 2112
-abc123, cs2112, Course 2112
-NNN999, cs2112, Course 2112
+S1, cs2110, Data Struture
+S2, cs2110, Data Structure
+S3, cs2110, Data Structure
+S2, cs2112, Course 2112
+S3, cs2112, Course 2112
+S4, cs2112, Course 2112
