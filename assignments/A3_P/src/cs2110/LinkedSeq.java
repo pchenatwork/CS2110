@@ -188,6 +188,10 @@ public class LinkedSeq<T> implements Seq<T> {
 
     @Override
     public void append(T elem) {
+        // Condion check, make sure the operation is legit.
+        assert elem != null;
+
+
         Node<T> successor = new Node<>(elem, null);
         if (head == null) {
             /*## ##head = successor; ##*/
@@ -269,6 +273,8 @@ public class LinkedSeq<T> implements Seq<T> {
     public boolean remove(T elem) {
         /* ### Paul's implementation ### */
         // 'prev' is the Node before 'curr'
+// $$ condition check $$ make sure 'remove' operation is legit
+
         Node<T> prev = null; // node before 'curr',  ini to null 
         Node<T> curr = head;// ini 'curr' pointing to header.
         int iRemovedCount = 0;  
@@ -276,7 +282,7 @@ public class LinkedSeq<T> implements Seq<T> {
             if (curr.data().equals(elem)){ 
                 // ** Node (curr) located **. 
                 // if curr is head (prev is null), reset head
-                // if curr is tail (curr.next90 == null), reset tail
+                // if curr is tail (curr.next()) == null), reset tail
                 // otherwise ....
                 if (curr == head || curr ==tail) {
                     head = (curr == head) ? head.next() : head;
