@@ -74,7 +74,8 @@ public class CsvJoin {
         // making 'rightDummyLine' the same size as firstRow of 'right', and a value of "empty string"
         // in case 'right line' is not found, we will use a dummy line to do left join
         LinkedSeq<String> rightDummyLine = new LinkedSeq<>(); right.get(0);
-        for (var token: right.get(0)) {
+        for (var token: right.get(0)) { 
+            //using the 'first line (index=0)' in 'right' file as reference to populate a 'DummyLine'
             rightDummyLine.append("");  
         }
 
@@ -106,11 +107,17 @@ public class CsvJoin {
         int iMaxColCount = 0;
         int iMinColCount = Integer.MAX_VALUE;
         for (var row : file){  // enhanced for-loop
+            // Assert 'row' has at least one element AND the element is not empty
+            //?if (row.size()==1) {
+            //?    var firstElement =  row.get(0);
+            //?    assert firstElement != null && firstElement.length()>0 : "input file has empty row";
+            //?}
+            // get min/max Column Count from every 'row'
             if (row.size() < iMinColCount) iMinColCount = row.size();
-            else if (row.size() > iMaxColCount) iMaxColCount = row.size();
+            if (row.size() > iMaxColCount) iMaxColCount = row.size();
         }
+        //assert iMinColCount > 0 : "input file has empty row";
         assert iMinColCount == iMaxColCount : "input file is not rectangular.";
-        assert iMinColCount > 0 : "input file has empty row";
     }
     /* **
      * Helper function to merger two LinkedSeq<>(left, right), skip right[0]

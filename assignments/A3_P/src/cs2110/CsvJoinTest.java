@@ -107,15 +107,16 @@ public class CsvJoinTest {
         
         System.out.println("Left  =  " + left.toString());        
         System.out.println("Right =  " + right.toString());    
-        System.out.println("Joined    =  " + join.toString()); 
-        System.out.println("Expected  =  " + expected.toString());
+        System.out.println("Joined   = " + join.toString()); 
+        System.out.println("Expected = " + expected.toString());
         assertEquals(expected, join);
     }
 
     @Test
     public void testJoin() throws IOException {
-        testJoinHelper("StudentCourse");
-    //    testJoinHelper("StudentCourse2");
+     //   testJoinHelper("StudentCourse");
+     //   testJoinHelper("Right-Empty-Test");
+        testJoinHelper("Left-Multi-Right-Multi-Test");
 
      //   testJoinHelper("states");
 
