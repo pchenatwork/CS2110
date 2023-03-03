@@ -8,7 +8,8 @@ public class Node<T> {
     /**
      * The list element in this node.
      */
-    private final T data;
+    // private final T data;
+    private T data;  ///*** ###PCHEN### demo share linkedSeq() ****/
 
     /**
      * Next node on list (null if this is the last node).
@@ -29,6 +30,13 @@ public class Node<T> {
      */
     public T data() {
         return data;
+    }
+    /**
+     *  ###PCHEN### add a 'setter' to demo Shared linkSeq
+     *  ###Explain overloading ###
+     *  */
+    public void data(T elem) {
+        data = elem;
     }
 
     /**

@@ -11,7 +11,6 @@ The Object is the superclass of all other classes, and Object reference can refe
 
 ** StringBuilder ** String s = null vs String s = "";
 
-
 ** Iterator interface in Java ** enhanced for-loop **
 https://www.geeksforgeeks.org/java-implementing-iterator-and-iterable-interface/
 https://www.cs.cornell.edu/courses/JavaAndDS/iteratorIterable/01iterator.pdf 
@@ -19,3 +18,12 @@ https://www.cs.cornell.edu/courses/JavaAndDS/iteratorIterable/01iterator.pdf
 file IO
 https://www.cs.cornell.edu/courses/JavaAndDS/files/io1.pdf
 
+** LindSeq vs Seq ** Programming against Type vs Implementation
+public static Seq<Seq<String>> csvToList(String fileNameWithFullPath){}
+
+** Linked List with circular reference **
+
+** Thinking Process ** Break big problem into small cases **
+Overlapping
+linked list deletion
+join Seq()

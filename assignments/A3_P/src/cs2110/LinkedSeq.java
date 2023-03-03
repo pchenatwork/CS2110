@@ -130,11 +130,23 @@ public class LinkedSeq<T> implements Seq<T> {
 
         /*## Paul's implementation */
         StringBuilder sb = new StringBuilder();
+
+        int iCount = 0 ; // ###PCHEN### add a counter to exit circular loop 
         while (curr != null){
             sb.append(curr.data());
-            curr = curr.next();
+
+            //## un-comment me to see circular reference ###
+            //### if (curr == tail) break; // ###PCHEN### break the loop when reach tail
+
+            curr = curr.next();            
             if (curr != null) {
                 sb.append(", ");
+            }
+            // ###PCHEN### add a counter to exit circular loop 
+            iCount++;
+            if (iCount > 100) {
+                sb.append(" ..... ");
+                 break; 
             }
         }
         str += sb.toString();
@@ -360,6 +372,35 @@ public class LinkedSeq<T> implements Seq<T> {
 
         // TODO 7: Write unit tests for this method, then finish implementing it according to its
         // specification.  Tests must compare at least three different pairs of lists.
+    }
+
+    /**
+     * ###PCHEN### Custom method to demostrate shared node
+     * @param right
+     */
+    public void joinLinkedSeq(LinkedSeq<T> right)
+    {
+        if (head==null) {
+            head = right.head;
+            tail = right.tail;
+        } else {
+            tail.setNext(right.head);
+            tail=right.tail;
+        }
+        size += right.size;
+    }
+    /**
+     * ###PCHEN### Custom method to demostrate shared node
+     * Read : https://www.geeksforgeeks.org/function-overloading-c/
+     * @param index
+     * @param elem
+     */
+    public void updateNode(int index, T elem){
+        Node<T> node = head;
+        for (int i = 0; i < index; i++) {
+            node = node.next();
+        }
+        node.data(elem);
     }
 
     /*

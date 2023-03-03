@@ -2,11 +2,13 @@
   "ExpandedNodes": [
     "",
     "\\bin",
+    "\\lib",
     "\\src",
     "\\src\\cs2110",
     "\\tests",
     "\\tests\\input-tests",
     "\\tests\\input-tests\\StudentCourse"
   ],
+  "SelectedNode": "\\src\\cs2110",
   "PreviewInSolutionExplorer": false
 }

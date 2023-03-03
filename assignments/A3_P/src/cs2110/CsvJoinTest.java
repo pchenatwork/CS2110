@@ -18,11 +18,56 @@ import java.util.Date;
  */
 
 public class CsvJoinTest {
-    private static String FILE_PATH = "C:/.Repos/pchenatwork/CS2110_/assignments/A3_P/tests/";
+    private static String FILE_PATH = "C:/.Repos/pchenatwork/CS2110_/assignments/A3_P/tests/";    
+    //private static String FILE_PATH = "";
 
     /* <STUDENT> */
     // TODO: Uncomment these tests after implementing the corresponding methods in `CsvJoin`.
     // You must also have implemented `LinkedSeq.toString()` and `LinkedSeq.equals()`.
+
+    @Test 
+    public void sharedNodesDemo(){
+        /* Demostrate LinkedSeq() with shared nodes
+         * joinLinkedSeq() + updateNode() are introduced
+         * 1. Node.java was immutable, remove 'final' to make Node mutable
+         * 2. make a 'setter' to Node.java
+         * 3. introduced joinLinkedSeq() to append LinkedSeq<>
+         * 4. introduced updateNode(index, value) to update a Node in LinkedSeq<>
+         * This is very interesting example to demo the linked list with circular reference
+         */
+        var line1 = new LinkedSeq<String>();
+        var line2 = new LinkedSeq<String>();
+        line1.append("a1");
+        line1.append("a2");
+        line2.append("b1");
+        line2.append("b2");          
+        System.out.println("Line1 before  = " + line1.toString()); 
+        System.out.println("Line2 before  = " + line2.toString()); 
+
+        var shared = new LinkedSeq<String>();
+        shared.append("X0");
+        shared.append("X1");
+        
+        System.out.println("shared  = " + shared.toString()); 
+
+        line1.joinLinkedSeq(shared);
+        line2.joinLinkedSeq(shared);    
+        
+        System.out.println("Line1 after1  = " + line1.toString()); 
+        System.out.println("Line2 after1  = " + line2.toString()); 
+
+        shared.updateNode(0, "0X");
+        System.out.println("Shared[0]  => " + "0X"); 
+        
+        System.out.println("Line1 after2  = " + line1.toString()); 
+        System.out.println("Line2 after2  = " + line2.toString()); 
+
+        line1.joinLinkedSeq(line2);
+        System.out.println("Line 1 + line 2  => " + line1.toString()); 
+        System.out.println("line 2  => " + line2.toString()); 
+
+        assertEquals(1, 1);
+    }
 
     @Test
     public void nullTester(){

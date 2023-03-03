@@ -1,5 +1,6 @@
 package cs2110;
-import java.io.*;   
+import java.io.*;
+import java.util.Scanner;   
 
 public class CsvJoin {
 
@@ -8,28 +9,33 @@ public class CsvJoin {
      * The CSV file is assumed to be in the platform's default encoding. Throws an IOException if
      * there is a problem reading the file.
      */
-    public static Seq<Seq<String>> csvToList(String fileNameWithPath){
+    public static Seq<Seq<String>> csvToList(String fileNameWithFullPath){
         // https://www.tutorialspoint.com/how-to-read-the-data-from-a-csv-file-in-java#:~:text=We%20can%20read%20a%20CSV,by%20using%20an%20appropriate%20index.
         
         String delimiter = ",";
-        Seq<Seq<String>> list = new LinkedSeq<Seq<String>>();
+        Seq<Seq<String>> tbl = new LinkedSeq<Seq<String>>();
+        Scanner scanner = null;
         try {
-            File file = new File(fileNameWithPath);
-            FileReader fr = new FileReader(file);
-            BufferedReader br = new BufferedReader(fr);
-            String line = "";
-            String[] tokens;
+            File file = new File(fileNameWithFullPath);
+            // make sure input file is readable/accessable by program
+            assert file.isFile() : "File not exists '" + fileNameWithFullPath + "'. Make sure 'fileNameWithFullPath' is absolute full path";
 
-            LinkedSeq<String> row; 
-            while((line = br.readLine()) != null) {
+            // use "java.util.Scanner" to read the file stream
+            scanner = new Scanner(file);
+
+            //FileReader fr = new FileReader(file);
+            //BufferedReader br = new BufferedReader(fr);
+            while(scanner.hasNextLine()) {
+            ///while((line = br.readLine()) != null) {
                 // create a new 'row' using LinkedSeq() data structure 
-                row = new LinkedSeq<String>();
+                var line = scanner.nextLine();
+                var row = new LinkedSeq<String>();
 
-                // Split the line into String[] array 
+                // Split(string, n): Split the line into String[] array 
                 /* Note If n is zero then the pattern will be applied as many times as possible, the array can have any length, 
                     and trailing empty strings will be discarded. */
                 /*## https://stackoverflow.com/questions/24701197/string-split-method-zero-and-negative-limit */
-                tokens = line.split(delimiter, -1); 
+                var tokens = line.split(delimiter, -1); 
                 /* ## tokens = line.split(delimiter); // === line.split(delimiter, 0) ## */
                 for(String token : tokens) {  
                     // ### Enhanced for loop ###
@@ -37,15 +43,19 @@ public class CsvJoin {
                     // append each token to row
                     row.append(token.trim());
                 }
-                // append 'row' to list
-                list.append(row);
+                // append 'row' to tbl
+                tbl.append(row);
             }
-            br.close();
+            ///br.close();
         } catch(IOException ioe) {
                ioe.printStackTrace();
         }
+        finally {
+            if(scanner!=null)
+                   scanner.close();
+        }
 
-        return list;
+        return tbl;
         
         /* ## 
         var line1 = new LinkedSeq<String>();
@@ -63,7 +73,9 @@ public class CsvJoin {
      * least 1 column.
      */
     public static Seq<Seq<String>> LeftJoin(Seq<Seq<String>> left, Seq<Seq<String>> right){
-        /** Condition check  **/
+        /** defensive programming practices  **
+         * assert that preconditions are satisfied *
+         * Condition check  **/
         assertInputFile(left);
         assertInputFile(right);       
         
@@ -74,7 +86,8 @@ public class CsvJoin {
         // making 'rightDummyLine' the same size as firstRow of 'right', and a value of "empty string"
         // in case 'right line' is not found, we will use a dummy line to do left join
         LinkedSeq<String> rightDummyLine = new LinkedSeq<>(); right.get(0);
-        for (var token: right.get(0)) { 
+        for (int i = 0; i<right.get(0).size(); i++) {  // using int to loop through all elements
+        //for (var token: right.get(0)) {   // using enhanced for-loop to loop through all elements
             //using the 'first line (index=0)' in 'right' file as reference to populate a 'DummyLine'
             rightDummyLine.append("");  
         }
@@ -101,7 +114,7 @@ public class CsvJoin {
 
     private static void assertInputFile(Seq<Seq<String>> file)
     {
-        // assert input at least 1 column
+        // assert input at least 1 row
         // assert input is rectangular
         assert file != null && file.size() > 0 : "input file is null or empty."; 
         int iMaxColCount = 0;
