@@ -146,7 +146,9 @@ public class CsvJoinTest {
         * be rectangular with at least one column.
         */
     static void testJoinHelper(String dir) throws IOException {
-        Seq<Seq<String>> left = CsvJoin.csvToList(FILE_PATH + "input-tests/" + dir + "/input1.csv");
+        
+        System.out.println("CsvJoin.FILE_PATH  =  " + CsvJoin.FILE_PATH);    
+        Seq<Seq<String>> left = CsvJoin.csvToList("input-tests/" + dir + "/input1.csv");
         Seq<Seq<String>> right = CsvJoin.csvToList(FILE_PATH + "input-tests/" + dir + "/input2.csv");
         Seq<Seq<String>> expected = CsvJoin.csvToList(FILE_PATH + "input-tests/" + dir + "/output.csv");
         Seq<Seq<String>> join = CsvJoin.LeftJoin(left, right);

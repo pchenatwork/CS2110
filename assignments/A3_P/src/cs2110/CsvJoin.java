@@ -1,11 +1,18 @@
 package cs2110;
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;   
 
 public class CsvJoin {
 
     //private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/input-tests/Left-Multi-Right-Multi-Test/";  
-    private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/"; 
+    //private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/"; 
+    
+    // get FILE_PATH == current path
+    public static final String FILE_PATH =  Paths.get("").toAbsolutePath().toString();
+    //https://stackoverflow.com/questions/4871051/how-to-get-the-current-working-directory-in-java
 
     /**
      * Load a table from a Simplified CSV file and return a row-major list-of-lists representation.
@@ -20,6 +27,7 @@ public class CsvJoin {
         Seq<Seq<String>> tbl = new LinkedSeq<Seq<String>>();
         //Scanner scanner = null;
       //  try {
+            File file1 = new File(FILE_PATH, fileNameWithFullPath);
             File file = new File(fileNameWithFullPath);
             // make sure input file is readable/accessable by program
             assert file.isFile() : "File not exists '" + fileNameWithFullPath + "'. Make sure 'fileNameWithFullPath' is absolute full path";
@@ -174,9 +182,20 @@ public class CsvJoin {
     public static void main (String[] args){
         System.out.println("=============================================================================" ); 
         System.out.println("* cs2110.CsvJoin expected two arguments: <left_table.csv> <right_table.csv> " ); 
-        System.out.println("* Folder location: " + FILE_PATH ); 
+        System.out.println("* Folder location: " + FILE_PATH  ); 
+        System.out.println("* Make change to 'CvsJoin->FILE_PATH' to  " ); 
         System.out.println("* Type 'exit' to exit the program"); 
         System.out.println("============================================================================ " ); 
+
+        Path currentRelativePath = Paths.get("");
+        String s1 = currentRelativePath.toAbsolutePath().toString();
+        System.out.println(s1); 
+        String s2 = Paths.get("").toAbsolutePath().toString();
+        System.out.println(s2); 
+        String s3= FileSystems.getDefault().getPath("").toAbsolutePath().toString();
+        System.out.println(s3); 
+
+
 
         var sc = new Scanner(System.in);        
         while (true) {          
