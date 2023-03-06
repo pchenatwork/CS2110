@@ -126,10 +126,23 @@ public class LinkedSeq<T> implements Seq<T> {
     @Override
     public String toString() {
         String str = "[";
+        String delimiter = ", ";
         Node<T> curr = head;
-
-        /*## Paul's implementation */
+        // Use StringBuilder() for string maniputation
         StringBuilder sb = new StringBuilder();
+        for(int i =0; i<size; i++){
+            // ## Paul's Implementation 2 ##
+            // This implementation is to prevent circular reference
+            // The loop will stop at the last index ( LinkedSeq[Size-1] )
+            sb.append(curr.data());
+            curr = curr.next();            
+            if (i < size-1) {
+                // append 'delimiter' if not last node
+                sb.append(delimiter);
+            }
+        }
+        str += sb.toString();
+        /* ## Paul's implementation ##
 
         int iCount = 0 ; // ###PCHEN### add a counter to exit circular loop 
         while (curr != null){
@@ -150,7 +163,7 @@ public class LinkedSeq<T> implements Seq<T> {
             }
         }
         str += sb.toString();
-        /* end of Paul's ##*/
+        ## end of Paul's ## */
 
         /**## Stanley's implementation ##
         while (curr != null) {
@@ -203,7 +216,6 @@ public class LinkedSeq<T> implements Seq<T> {
         // Condion check, make sure the operation is legit.
         assert elem != null;
 
-
         Node<T> successor = new Node<>(elem, null);
         if (head == null) {
             /*## ##head = successor; ##*/
@@ -224,9 +236,15 @@ public class LinkedSeq<T> implements Seq<T> {
 
     @Override
     public void insertBefore(T elem, T successor) {
-        //## Paul's Implementation ## assertions check
-        assert contains(successor): "'Successor' does not exist."; /**## ##**/
-        assert elem != null : "'elem' can not be null."; 
+        //## Paul's Implementation ## 
+        // assertions check
+        //assert contains(successor): "'Successor' does not exist."; /**## ##**/            
+        if (!contains(successor)) 
+            throw new IllegalArgumentException("Successor not found in list: " + successor);
+        
+        //assert elem != null : "'elem' can not be null.";          
+        if (elem == null) 
+            throw new IllegalArgumentException ("'elem' can not be null.");
 
         // 'prev' is the Node before 'curr'
         var curr = head; // ini 'curr' pointing to header.
@@ -236,7 +254,7 @@ public class LinkedSeq<T> implements Seq<T> {
                 // successor found. 
                 // creating 'NewNode' that is pointing to 'successor'
                 var myNewNode = new Node<T>(elem, curr);
-                // if curr is head (myNode is null), myNewNode becomes the new head
+                // if curr is head (prev is null), myNewNode becomes the new head
                 if (prev == null) {
                     head = myNewNode;
                 } 

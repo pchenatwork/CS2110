@@ -1,8 +1,8 @@
 netid, name, courseid, coursename
-S1X, xyz xyz,,
-S2, def def, cs2110, Data Structure
-S2, def def, cs2112, Course 2112
-S3, ghi ghi, cs2110, Data Structure
-S3, ghi ghi, cs2112, Course 2112
-S4, abc abc, cs2112, Course 2112
-S5X, che che,,
+S1X, Student 1X,,
+S2, Student 2, cs2110, Data Structure
+S2, Student 2, cs2112, Course 2112
+S3, Student 3, cs2110, Data Structure
+S3, Student 3, cs2112, Course 2112
+S4, Student 4, cs2112, Course 2112
+S5X, Student 5X,,

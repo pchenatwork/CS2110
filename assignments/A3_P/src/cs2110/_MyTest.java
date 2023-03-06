@@ -1,10 +1,95 @@
 package cs2110;
 
-import cs2110.*;
 import static org.junit.Assert.assertEquals;
+
+import java.util.Date;
+
 import org.junit.*;
 
 public class _MyTest {
+    
+    @Test 
+    public void sharedNodesDemo(){
+        /* Demostrate LinkedSeq() with shared nodes
+         * joinLinkedSeq() + updateNode() are introduced
+         * 1. Node.java was immutable, remove 'final' to make Node mutable
+         * 2. make a 'setter' to Node.java
+         * 3. introduced joinLinkedSeq() to append LinkedSeq<>
+         * 4. introduced updateNode(index, value) to update a Node in LinkedSeq<>
+         * This is very interesting example to demo the linked list with circular reference
+         */
+        var line1 = new LinkedSeq<String>();
+        var line2 = new LinkedSeq<String>();
+        line1.append("a1");
+        line1.append("a2");
+        line2.append("b1");
+        line2.append("b2");          
+        System.out.println("Line1 before  = " + line1.toString()); 
+        System.out.println("Line2 before  = " + line2.toString()); 
+
+        var shared = new LinkedSeq<String>();
+        shared.append("X0");
+        shared.append("X1");
+        
+        System.out.println("shared  = " + shared.toString()); 
+
+        line1.joinLinkedSeq(shared);
+        line2.joinLinkedSeq(shared);    
+        
+        System.out.println("Line1 after1  = " + line1.toString()); 
+        System.out.println("Line2 after1  = " + line2.toString()); 
+
+        shared.updateNode(0, "0X");
+        System.out.println("Shared[0]  => " + "0X"); 
+        
+        System.out.println("Line1 after2  = " + line1.toString()); 
+        System.out.println("Line2 after2  = " + line2.toString()); 
+
+        line1.joinLinkedSeq(line2);
+        System.out.println("Line 1 + line 2  => " + line1.toString()); 
+        System.out.println("line 2  => " + line2.toString()); 
+
+        assertEquals(1, 1);
+    }
+
+    @Test
+    public void nullTester(){
+                
+        /// https://www.geeksforgeeks.org/interesting-facts-about-null-in-java/
+
+        /// https://courses.engr.illinois.edu/cs225/sp2023/resources/stack-heap/
+        /**
+         *    The Java programming language has a built-in null type, called “null”, 
+         *    which is a subtype of all reference types
+         *  it cannot be used as a type for a variable, because it doesn’t have any instance and cannot be instantiated.
+         */
+        String NullStr=null;
+
+        //String NullStr;
+        Student S = null;
+        assertEquals(NullStr, S); // TRUE
+
+        Course C = null;
+        assertEquals(C, S);  // TRUE
+
+        Date D = null;
+        assertEquals(NullStr, D);  // TRUE
+        
+        System.out.println("Date(null) =  '" + D + "'");
+        System.out.println("String(null) =  '" + NullStr + "'");
+        // System.out.println("S(null) =  " + S.toString()); /* ## will fail because not initiated :  ## */
+
+        String a1 = null;
+        String a2 = null;
+        assertEquals(a1, a2); // TRUE
+
+        //assertNotEquals(a1, a2);
+         a1 = " ";
+         a2 = a1.trim();
+
+        assertEquals("", a2);
+
+    }
     @Test
     public void Assignment2_Test(){
 
