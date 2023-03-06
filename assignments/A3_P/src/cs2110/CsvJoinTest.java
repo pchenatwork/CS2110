@@ -18,7 +18,7 @@ import java.util.Date;
  */
 
 public class CsvJoinTest {
-    private static String FILE_PATH = "C:/.Repos/pchenatwork/CS2110_/assignments/A3_P/tests/";    
+    private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/";    
     //private static String FILE_PATH = "";
 
     /* <STUDENT> */
@@ -81,6 +81,7 @@ public class CsvJoinTest {
          *  it cannot be used as a type for a variable, because it doesn’t have any instance and cannot be instantiated.
          */
         String NullStr=null;
+
         //String NullStr;
         Student S = null;
         assertEquals(NullStr, S); // TRUE
@@ -160,8 +161,8 @@ public class CsvJoinTest {
     @Test
     public void testJoin() throws IOException {
      //   testJoinHelper("StudentCourse");
-     //   testJoinHelper("Right-Empty-Test");
-        testJoinHelper("Left-Multi-Right-Multi-Test");
+        testJoinHelper("Right-Empty-Test");
+     //   testJoinHelper("Left-Multi-Right-Multi-Test");
 
      //   testJoinHelper("states");
 

@@ -8,7 +8,7 @@ public class Node<T> {
     /**
      * The list element in this node.
      */
-    // private final T data;
+   // private final T data;
     private T data;  ///*** ###PCHEN### demo share linkedSeq() ****/
 
     /**

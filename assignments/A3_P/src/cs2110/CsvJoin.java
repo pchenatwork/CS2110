@@ -4,24 +4,28 @@ import java.util.Scanner;
 
 public class CsvJoin {
 
+    //private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/input-tests/Left-Multi-Right-Multi-Test/";  
+    private static String FILE_PATH = "X:/Repos/pchenatwork/CS2110/assignments/A3_P/tests/"; 
+
     /**
      * Load a table from a Simplified CSV file and return a row-major list-of-lists representation.
      * The CSV file is assumed to be in the platform's default encoding. Throws an IOException if
      * there is a problem reading the file.
      */
-    public static Seq<Seq<String>> csvToList(String fileNameWithFullPath){
+    public static Seq<Seq<String>> csvToList(String fileNameWithFullPath) throws FileNotFoundException{
         // https://www.tutorialspoint.com/how-to-read-the-data-from-a-csv-file-in-java#:~:text=We%20can%20read%20a%20CSV,by%20using%20an%20appropriate%20index.
         
+
         String delimiter = ",";
         Seq<Seq<String>> tbl = new LinkedSeq<Seq<String>>();
-        Scanner scanner = null;
-        try {
+        //Scanner scanner = null;
+      //  try {
             File file = new File(fileNameWithFullPath);
             // make sure input file is readable/accessable by program
             assert file.isFile() : "File not exists '" + fileNameWithFullPath + "'. Make sure 'fileNameWithFullPath' is absolute full path";
 
             // use "java.util.Scanner" to read the file stream
-            scanner = new Scanner(file);
+        Scanner  scanner = new Scanner(file);
 
             //FileReader fr = new FileReader(file);
             //BufferedReader br = new BufferedReader(fr);
@@ -36,6 +40,7 @@ public class CsvJoin {
                     and trailing empty strings will be discarded. */
                 /*## https://stackoverflow.com/questions/24701197/string-split-method-zero-and-negative-limit */
                 var tokens = line.split(delimiter, -1); 
+                tokens = line.split(delimiter); 
                 /* ## tokens = line.split(delimiter); // === line.split(delimiter, 0) ## */
                 for(String token : tokens) {  
                     // ### Enhanced for loop ###
@@ -47,13 +52,13 @@ public class CsvJoin {
                 tbl.append(row);
             }
             ///br.close();
-        } catch(IOException ioe) {
-               ioe.printStackTrace();
-        }
-        finally {
+        //} catch(IOException ioe) {
+        //       ioe.printStackTrace();
+        //}
+        //finally {
             if(scanner!=null)
                    scanner.close();
-        }
+       // }
 
         return tbl;
         
@@ -85,7 +90,8 @@ public class CsvJoin {
 
         // making 'rightDummyLine' the same size as firstRow of 'right', and a value of "empty string"
         // in case 'right line' is not found, we will use a dummy line to do left join
-        LinkedSeq<String> rightDummyLine = new LinkedSeq<>(); right.get(0);
+        LinkedSeq<String> rightDummyLine = new LinkedSeq<>(); 
+        // right.get(0);
         for (int i = 0; i<right.get(0).size(); i++) {  // using int to loop through all elements
         //for (var token: right.get(0)) {   // using enhanced for-loop to loop through all elements
             //using the 'first line (index=0)' in 'right' file as reference to populate a 'DummyLine'
@@ -112,11 +118,12 @@ public class CsvJoin {
         return newFile;
     }
 
-    private static void assertInputFile(Seq<Seq<String>> file)
+    private static void assertInputFile(Seq<Seq<String>> file) 
     {
         // assert input at least 1 row
         // assert input is rectangular
         assert file != null && file.size() > 0 : "input file is null or empty."; 
+
         int iMaxColCount = 0;
         int iMinColCount = Integer.MAX_VALUE;
         for (var row : file){  // enhanced for-loop
@@ -145,5 +152,64 @@ public class CsvJoin {
             newLine.append(right.get(i));
         }
         return newLine;
+    }
+    
+    /**
+     * output "Seq<String>" to ', ' seperated string
+     */
+    public static String toCSV(Seq<String> line){
+        String delimiter = ", ";
+        StringBuilder sb = new StringBuilder();
+        for (var token: line){
+            sb.append(token);
+            sb.append(delimiter);
+        }
+        // remove trailing 'delimiter'
+        sb.delete(sb.length() - delimiter.length(), sb.length());
+        // append line break
+        // sb.append("\n");
+
+        return sb.toString();
+    }
+    public static void main (String[] args){
+        System.out.println("=============================================================================" ); 
+        System.out.println("* cs2110.CsvJoin expected two arguments: <left_table.csv> <right_table.csv> " ); 
+        System.out.println("* Folder location: " + FILE_PATH ); 
+        System.out.println("* Type 'exit' to exit the program"); 
+        System.out.println("============================================================================ " ); 
+
+        var sc = new Scanner(System.in);        
+        while (true) {          
+            Seq<Seq<String>> left = readFile(sc, "Please enter <left_table.csv>: ");
+            if (left==null) break;    
+            Seq<Seq<String>> right = readFile(sc, "Please enter <right_table.csv>: ");
+            if (right==null) break;
+            var joinedFile = LeftJoin(left, right);
+            for(var line : joinedFile){
+                System.out.println(toCSV(line));
+            }
+        }      
+        sc.close();
+        return;     
+    }
+    /**
+     * Helper function to read input file from command prompt 
+     * @param sc Scanner
+     * @param prompt Command Prompt Message
+     * @return Seq<Seq<String>>
+     */
+    private static Seq<Seq<String>> readFile(Scanner sc, String prompt) {
+        Seq<Seq<String>> file = null;
+        System.out.print(prompt);
+        String input = sc.nextLine().trim();
+        if (input.split(" ")[0].toLowerCase().equals("exit")) return file;
+        try{
+            file = csvToList(FILE_PATH + input);
+        }
+        catch (Exception e) {
+            System.err.println(e.getMessage());
+            file = readFile(sc, prompt);
+        }
+        return file;
     }
 }
