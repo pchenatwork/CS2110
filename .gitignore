@@ -1,5 +1,5 @@
-.vs/**
+.vs
 **/bin/**
 **/lib/**
-/assignments/A3_X/**
+**/A3_X/**
 /assignments/A3_S/**
