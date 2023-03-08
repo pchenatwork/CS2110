@@ -104,9 +104,9 @@ public class CsvJoin {
            System.out.println("Usage: cs2110.CsvJoin <left-csv-file> <right-csv-file>");
        //    System.exit(1);
        }
-       // String leftCsvFile = args[0];
-       // String rightCsvFile = args[1];
-       // Seq<Seq<String>> leftTable = csvToList(leftCsvFile);
+       String leftCsvFile = args[0];
+       String rightCsvFile = args[1];
+       Seq<Seq<String>> leftTable = csvToList(leftCsvFile);
        // Seq<Seq<String>> rightTable = csvToList(rightCsvFile);
        //  Seq<Seq<String>> joinedTable = join(leftTable, rightTable);
        Seq<Seq<String>> joinedTable = new LinkedSeq<>();
