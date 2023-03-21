@@ -3,11 +3,14 @@ package cs2110;
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import org.junit.Assert;
 
 /**
  * Stores the academic genealogy of a "root" professor, defined as all professors who earned a PhD
@@ -281,14 +284,36 @@ public class PhDTree {
     public List<Professor> findAcademicLineage(String targetName) throws NotFound {
         // TODO 7: Implement this method according to its specification.
         // Implementation constraint: This method must be recursive.
-        // Do not use findAdvisor() in this method: it is too inefficient, leading to multiple
+        // Do not use findAdvisor() in this method: it is too inefficient, leading to multiple #### WHY ???? ###
         // traversals of the tree. This method must return an object satisfying the interface
         // `List<Professor>`. Recall that `List<T>` is an interface, so use a class that implements
         // it, like `java.util.LinkedList<T>`.  Choose an implementation that provides your
         // most-used operations efficiently.
         // Hint: The base case is when the root of this PhDTree is `targetName`, in which case the
         // lineage is a list containing only `targetName`.
-        throw new UnsupportedOperationException();
+        ///throw new UnsupportedOperationException();
+
+        /*####
+         * Formula: 
+         *  List(ParentTree contains Target)) = 'Professor'  + List (ChildTree Contains Target) + EmptyList (ChildTree doesn't contain target)
+         */
+
+        // assert contains(targetName) : "TargetName '" + targetName + "' doesn't exists.";
+
+         java.util.LinkedList<Professor> lst = new LinkedList<>();
+
+         if (contains(targetName)){
+            lst.add(professor);
+            if (professor.name().equals(targetName)){
+                return lst;
+            }
+            else {  
+                for (PhDTree advisee : advisees) {
+                    lst.addAll(advisee.findAcademicLineage(targetName));
+                }
+            }
+         }
+         return lst;
     }
 
     /**
