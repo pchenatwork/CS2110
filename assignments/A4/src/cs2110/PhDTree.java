@@ -293,15 +293,17 @@ public class PhDTree {
         // lineage is a list containing only `targetName`.
         ///throw new UnsupportedOperationException();
 
-        /*####
-         * Formula: 
-         *  List(ParentTree contains Target)) = 'Professor'  + List (ChildTree Contains Target) + EmptyList (ChildTree doesn't contain target)
-         */
-
         // assert contains(targetName) : "TargetName '" + targetName + "' doesn't exists.";
 
          java.util.LinkedList<Professor> lst = new LinkedList<>();
 
+        /*####
+         * Formula: 
+         * if (Target is found)
+         *  List(ParentTree contains Target)) = 'Professor'  + List (ChildTree Contains Target) 
+         * else
+         *  EmptyList()
+         */
          if (contains(targetName)){
             lst.add(professor);
             if (professor.name().equals(targetName)){
@@ -309,7 +311,10 @@ public class PhDTree {
             }
             else {  
                 for (PhDTree advisee : advisees) {
-                    lst.addAll(advisee.findAcademicLineage(targetName));
+                    if (advisee.contains(targetName)){
+                        lst.addAll(advisee.findAcademicLineage(targetName));
+                        break;
+                    }
                 }
             }
          }
