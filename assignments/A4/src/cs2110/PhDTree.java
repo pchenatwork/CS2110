@@ -159,13 +159,13 @@ public class PhDTree {
 
         /* ### Formula : 
         Size = 1 + SizeOfAllChild 
-             = 1 + (advisee_1.size + ... + advisee_N.size())    
+             = 1 + (advisee_1.size() + ... + advisee_N.size())    
         *### */    
-        int iChildSize = 0;
-        for (PhDTree advisee : advisees) {
-            iChildSize += advisee.size();
+        int iAllChildSize = 0; // All Child Size initialize to 0
+        for (PhDTree advisee : advisees) { // Each PhDTree.advisees[] is a PhDTree()
+            iAllChildSize += advisee.size();
         }
-        return 1 + iChildSize;
+        return 1 + iAllChildSize;
     }
 
     /**
@@ -183,7 +183,7 @@ public class PhDTree {
         /*### * Formula *: 
             maxDepth = 1 + MAX(advisee_1.maxDepth, ..... + advisee_N.maxDepth )
          */
-        int iDepth = 0;
+        int iDepth = 0; // Assume maxDepth=0
         for (PhDTree advisee : advisees) {
             if (advisee.maxDepth()>iDepth) iDepth = advisee.maxDepth();
         }
@@ -208,10 +208,19 @@ public class PhDTree {
             return this;
         } else {
             for (PhDTree advisee : advisees) {
-                return advisee.findTree(targetName);
+                // loop through every items in PhDTree.advisees[] to find a hit
+                try{
+                    // using the try-catch to make sure every 'advisee' are examed.. 
+                    return advisee.findTree(targetName);
+                } 
+                catch (NotFound exc) {
+                   // do nothing , this is to make sure all sub-routine will be executed
+                   // otherwise the NotFound() Exception from sub-routine will break the execution
+                }
             }
         }
-        // Not found under any child; throw an exception ourselves.
+        // Only the TOP-MOST findTree() call will throw this exception. 
+        // All NotFound() Exceptions from sub-routine findTree() call are muted by try-catch{}
         throw new NotFound();
     }
 
@@ -240,13 +249,18 @@ public class PhDTree {
         // DO NOT traverse the tree twice looking for the same professor--don't duplicate work.
         //throw new UnsupportedOperationException();
 
-        /* ###
-         * 
-         */
+        // Condition check. 
+        // 1. make sure "newAdvisee" is not in the tree yet
+        // 2. make sure "advisorName" is node in the tree
         assert !contains(newAdvisee.name()) : "newAdvisee '" + newAdvisee.name() + "' already exists!";
+        
+        // ** since findTree() already imply Condition 2, the following assert() is redundent **
+        // assert contains(advisorName) : "Advisor '" + advisorName + "' doesn't exist!";
+
         var myTree = findTree(advisorName);
 
         if (myTree!=null){
+            // when the sub PhDTree() is found, attach the newAdvisee as a new PhDTree.advisees[] member
             myTree.advisees.add(new PhDTree(newAdvisee));
             return;
         } else {                
@@ -265,14 +279,34 @@ public class PhDTree {
         // TODO 6: Implement this method according to its specification.
         // Implementation constraint: This method must be recursive.
         //throw new UnsupportedOperationException();
-
-        if (this.professor.name().equals(targetAdviseeName)){
-            return this.professor;
-        }        
-        for (PhDTree advisee : advisees) {
-            return advisee.findAdvisor(targetAdviseeName);
+        
+        /* ### Formula Notes ###:
+         * We have (1) PhDTree.professor
+         *         (2) PhDTree.advisees[]
+         * Loop through PhDTree.advisees[], 
+         *   If there is a hit in PhDTree.advisees[], Advisor == "PhDTree.professor"
+         *   Else do the same thing with each PhDTree.advisees[] (each "advisee" is a PhDTree)
+         */
+        Professor _advisor = null;  // Assume advisor not found
+        for (PhDTree advisee : advisees) { // Loop through PhDTree.advisees[], 
+            if (advisee.prof().name().equals(targetAdviseeName)){
+                // advisee found, return 'PhDTree.professor' and break the loop
+                _advisor = professor;
+                break; 
+            } else {
+                // $$$$ recursively look for "Professor" from each 'advisee' (each advisee is a PhDTree())
+                try {
+                    // $$$$ Same idea as TODO 4: 
+                    // $$$$ ignore "NotFound" exception from sub PhDTree search to finish ALL sub routin
+                    _advisor = advisee.findAdvisor(targetAdviseeName);
+                } 
+                catch (NotFound exc) {
+                   // $$ do nothing , just ignore the exception from sub PhDTree search
+                }
+            }
         }
-        throw new NotFound();
+        if (_advisor ==null) throw new NotFound();
+        return _advisor;
     }
 
     /**
@@ -311,7 +345,9 @@ public class PhDTree {
             }
             else {  
                 for (PhDTree advisee : advisees) {
+                    // Only work on the PhDTree.advisee (a PhDTree() itself) that contain 'targetName'
                     if (advisee.contains(targetName)){
+                        // LinkedList.addAll() will append a 'sub-list' to 'lst'
                         lst.addAll(advisee.findAcademicLineage(targetName));
                         break;
                     }
@@ -332,7 +368,45 @@ public class PhDTree {
         // Instead, use `findAcademicLineage()` to find the routes to the two advisees, then iterate
         // over the common prefix of the routes.  If iterating using indices, ensure that the data
         // structure can be iterated over efficiently.
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
+
+        /* ================== This implementation return the first hit, which is WRONG !!!! *
+        eg : left = N1->N2->N3->N4
+            Right = N1->N2->N5->N6
+            commonAncesstor = N2 
+         * ========================
+        List<Professor> left = findAcademicLineage(prof1Name);
+        List<Professor> right = findAcademicLineage(prof2Name);
+        for(var prof1: left){
+            for(var prof2: right){
+                if (prof1.equals(prof2)){
+                   return prof2;  // Return prof2
+                }
+            }
+        }
+        // throw NotFound if code can be executed here
+        throw new NotFound();
+        //* ================== This implementation return the first hit, WRONG !!!! */
+
+        var left = findAcademicLineage(prof1Name).toArray();
+        var right = findAcademicLineage(prof2Name).toArray();
+        Professor _commonAncestor = null ; // Assume no common ancesstor
+        for(int i = 0; i< left.length; i++){
+            if(((Professor)left[i]).equals((Professor)right[i])){
+                // If left and right share the same ancesstor, the heading portion should overlap, 
+                // the last match is the common ancestor
+                _commonAncestor = (Professor)left[i]; 
+            }
+            else {
+                break;
+            }
+        }
+        if (_commonAncestor==null){
+            throw new NotFound();
+        }
+        return _commonAncestor;
+
+
     }
 
     /**
@@ -390,6 +464,7 @@ public class PhDTree {
      * <pre>
      * Maya Leong - 2005
      * Matthew Hui - 2023
+     * ## Amy_Huang  -- ???PCHEN NOTE ### Missing ??? ###
      * David Gries - 1966
      * Curran Muhlberger - 2014
      * Andrew Myers - 1999
@@ -400,5 +475,25 @@ public class PhDTree {
         // TODO 9: Implement this method according to its specification.
         // Implementation constraint: This method must be recursive.
         // Traverse the tree in PREORDER, respecting the ordering of advisees.
+
+        out.println(professor.name() + " - " + professor.phdYear());
+        for(var advisee : advisees){
+            advisee.printProfessors(out);
+        }
+
+        //## another approach. use a helper function ## Not Tested Yet ##
+        //printPhDTree(this, out);
     }
+    /**
+     * Helper 
+     * @param node
+     * @param out
+
+    private void printPhDTree(PhDTree node, PrintWriter out) {
+        out.println(node.professor.name() + " - " + node.professor.phdYear());
+        for(var advisee : node.advisees){
+            printPhDTree(advisee, out);
+        }
+    }
+     */
 }

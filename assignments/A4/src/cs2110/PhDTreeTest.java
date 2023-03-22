@@ -20,22 +20,80 @@ public class PhDTreeTest {
     private static final Professor prof4 = new Professor("Arianna Curillo", 2022);
     private static final Professor prof5 = new Professor("Michelle Gao", 2022);
     private static final Professor prof6 = new Professor("Isa Siu", 2024);
+    
+    private static final Professor Prof_23 = new Professor("Prof_23", 2023);
+    private static final Professor Prof_231 = new Professor("Prof_231", 2024);
+    private static final Professor Prof_232 = new Professor("Prof_232", 2024);
+    private static final Professor Prof_23111 = new Professor("Prof_23111", 2025);
 
     // These helper methods create a copy of each Professor object, which would normally be seen as
     // wasteful.  They do so to help expose bugs involving the use of `==` instead of `.equals()`.
+    /**
+     * <pre> Tree1 structure: (Only one root node)
+     * [Amy Huang] (Prof1)
+     * */
     private static PhDTree tree1() {
+        /***#### 
+         * can be simplified to:
+         * return new PhDTree(prof1);
+         * $$$$ Why doing so ??? $$$$ ???
+         */
         return new PhDTree(new Professor(prof1));
     }
-
+    /**
+     * <pre> Tree2 structure: (Only one root node)
+     * [Arianna Curillo] (Prof4)
+     * */
     private static PhDTree tree2() {
         return new PhDTree(new Professor(prof4));
     }
-
+    /**
+     * <pre> Tree3 structure: (Linear tree)
+     * 
+     * [Amy Huang] (Prof1) (Root)
+     *  | 
+     * [Maya Leong] (Prof2)
+     *  |           
+     * [Matthew Hui] (Prof3) (Leaf)
+     * </pre>
+     */
     private static PhDTree tree3() throws NotFound {
         PhDTree t = new PhDTree(new Professor(prof1));
         t.insert(prof1.name(), new Professor(prof2));
         t.insert(prof2.name(), new Professor(prof3));
         return t;
+    }
+/**
+ * <pre> MyTree structure: 
+ * 
+ * [Amy Huang](Prof1)(Root)
+ *  | ---------------------\--------------\
+ * [Maya Leong](Prof2)     [Prof_23]    [Prof_22]
+ *  |                       |------\
+ * [Matthew Hui](Prof3) [Prof_231] [Prof_232]
+ *                         |
+ *                     [Prof_2311]
+ *                        |
+ *                    [Prof_23111]
+ * </pre>
+ */
+    private static PhDTree mytree()  throws NotFound {
+        PhDTree t = new PhDTree(new Professor(prof1));
+        t.insert(prof1.name(), new Professor(prof2));
+        t.insert(prof2.name(), new Professor(prof3));
+        
+        t.insert(prof1.name(), new Professor("Prof_22", 2022));
+        t.insert(prof1.name(), Prof_23); // $$$ Just use the static value to be part of the tree instead of making a copy. $$$
+
+        ////System.out.println(t.toString());
+
+        t.insert("Prof_23", new Professor(Prof_231));
+        t.insert("Prof_231", new Professor("Prof_2311", 2024));
+        t.insert("Prof_2311", new Professor(Prof_23111));
+        t.insert("Prof_23", new Professor(Prof_232));
+
+        return t;
+
     }
 
     @Test
@@ -52,10 +110,18 @@ public class PhDTreeTest {
     @Test
     public void testNumAdvisees() throws NotFound {
         PhDTree t = tree1();
-        assertEquals(0, t.numAdvisees());
+        assertEquals(0, t.numAdvisees());  //$$$ tree with only root node, advisees == 0
 
         // TODO: Add three additional tests of `numAdvisees()` using your own tree(s)
+        //#################//
+        t.insert(prof1.name(), Prof_23); // $$$ attach Prof_23 to Prof1(root), 
+        assertEquals(1, t.numAdvisees()); // $$$ advisees == 1
 
+        t.insert(prof1.name(), Prof_231); // $$$ attach Prof_231 to Prof1(root)
+        assertEquals(2, t.numAdvisees()); // $$$now advisees == 2
+
+        t = mytree(); // $$$ t pointing to mytree()
+        assertEquals(3, t.numAdvisees());
     }
 
     @Test
@@ -64,7 +130,17 @@ public class PhDTreeTest {
         assertEquals(3, t.size());
 
         // TODO: Add three additional tests of `size()` using your own tree(s)
+        // Create a new Tree
+        t = new PhDTree(prof1);
+        // Size should be 1
+        assertEquals(t.size(), 1);  
+        // Insert a new node to the tree, size should be 2 
+        t.insert(prof1.name(), prof2);
+        assertEquals(t.size(), 2);   
 
+        // mytree 
+        t = mytree();
+        assertEquals(t.size(), 9);
     }
 
     @Test
@@ -73,7 +149,11 @@ public class PhDTreeTest {
         assertEquals(3, t.maxDepth());
 
         // TODO: Add three additional tests of `maxDepth()` using your own tree(s)
+        t = tree1();  // The given tree1() has only one element, therefore depth = 1
+        assertEquals(1, t.maxDepth());
 
+        t = mytree(); //
+        assertEquals(5, t.maxDepth());
     }
 
     @Test
@@ -91,7 +171,13 @@ public class PhDTreeTest {
         assertEquals(1, tree1.findTree(prof3.name()).size());
 
         // TODO: Add three additional tests of `findTree()` using your own tree(s)
-
+        assertThrows(NotFound.class, () -> mytree().findTree(prof5.name()));
+        PhDTree t1 = new PhDTree(prof1);  // find root 
+        assertEquals(t1.prof(), mytree().findTree(prof1.name()).prof());
+        PhDTree t2 = new PhDTree(Prof_23); // find middle node
+        assertEquals(t2.prof(), mytree().findTree(Prof_23.name()).prof());
+        PhDTree tx = new PhDTree(Prof_23111); // find leave node
+        assertEquals(tx.prof(), mytree().findTree(Prof_23111.name()).prof());
     }
 
     @Test
@@ -119,6 +205,9 @@ public class PhDTreeTest {
 
         // TODO: Add three additional tests of `findAdvisor()` using your own tree(s)
 
+        PhDTree tx = mytree();
+        assertEquals(Prof_23, tx.findAdvisor(Prof_232.name()));  // leaf node
+        assertEquals(prof1, tx.findAdvisor(Prof_23.name()));  // middle node
     }
 
     @Test
@@ -142,7 +231,14 @@ public class PhDTreeTest {
         assertThrows(NotFound.class, () -> t.commonAncestor(prof5.name(), prof3.name()));
 
         // TODO: Add three additional tests of `commonAncestor()` using your own tree(s)
+        // Two same nodes should share "self" as common ancestor
+        PhDTree t3=tree3();
+        assertEquals(prof1, t3.commonAncestor(prof1.name(), prof1.name()));  // Root
+        assertEquals(prof3, t3.commonAncestor(prof3.name(), prof3.name()));  // Leaf
 
+        t3 = mytree();
+        assertEquals(Prof_23, t3.commonAncestor(Prof_23111.name(), Prof_232.name()));  // middle node
+        assertEquals(Prof_23, t3.commonAncestor(Prof_23.name(), Prof_232.name()));  // middle node
     }
 
     @Test
@@ -171,6 +267,16 @@ public class PhDTreeTest {
                     "Matthew Hui - 2025"
             };
             assertArrayEquals(lines, expected);
+
+            //TO DO #### printProfessors() has issue ###
+            PhDTree tx = mytree();
+            tx.printProfessors(pw);
+            lines = out.toString().split("\\R");
+            
+            for(var str : lines){
+                System.out.println(str);
+            }
+
         }
 
         // TODO: Add three additional tests of `commonAncestor()` using your own tree(s)
