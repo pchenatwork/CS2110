@@ -8,7 +8,11 @@ import java.util.Objects;
 public final class Professor implements Comparable<Professor> {
 
     /* ### Why implement Comparable<T>? ## for sorting ###
-    https://www.scaler.com/topics/java/comparable-and-comparator-in-java/
+     # the compareTo() overide will be used to determine the sorting order in PhDTree.advisees[] (SortedSet<PhDTree>)
+    reading : https://www.scaler.com/topics/java/comparable-and-comparator-in-java/
+    reading : https://www.geeksforgeeks.org/hashset-vs-treeset-in-java/
+    https://www.geeksforgeeks.org/treeset-in-java-with-examples
+    
     ## */
     /**
      * Full name of this professor.  Must not be empty.

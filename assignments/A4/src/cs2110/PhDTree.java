@@ -33,6 +33,8 @@ public class PhDTree {
      * an advisee of the professor at this node.  The PhDTree nodes reachable via `advisees` form a
      * tree.
      */
+    //$$$ reading : https://www.geeksforgeeks.org/treeset-in-java-with-examples
+    //*** reading :  https://www.programiz.com/java-programming/set  */
     private SortedSet<PhDTree> advisees;
 
     /**
@@ -476,18 +478,38 @@ public class PhDTree {
         // Implementation constraint: This method must be recursive.
         // Traverse the tree in PREORDER, respecting the ordering of advisees.
 
+        //$$$$ Reading $$$$$
+        //https://www.geeksforgeeks.org/tree-traversals-inorder-preorder-and-postorder/
+        //https://faculty.cs.niu.edu/~mcmahon/CS241/Notes/Data_Structures/binary_tree_traversals.html
+
+        /** (1) Pre-order : [parent] -> [all children]  ======*
         out.println(professor.name() + " - " + professor.phdYear());
         for(var advisee : advisees){
             advisee.printProfessors(out);
+        }  
+        /** (1) Pre-order End ===== */
+        /** (2) Post Order : [all children] -> [parent] ===== *
+        for(var advisee : advisees){
+            advisee.printProfessors(out);
         }
+        out.println(professor.name() + " - " + professor.phdYear());        
+        /** (2) Post Order End ===== */
+
+        /** (3) In-Order : [child] -> [parent] -> [other child] 
+         *  Usually only applicable to binary tree, eg [left child] -> [parent] -> [right child]
+         * */
+        //  (3) Not implemented here       
+        /** (3) In-Order End ===== */
+
 
         //## another approach. use a helper function ## Not Tested Yet ##
-        //printPhDTree(this, out);
+        printPhDTree(this, out);
     }
     /**
      * Helper 
      * @param node
      * @param out
+     */
 
     private void printPhDTree(PhDTree node, PrintWriter out) {
         out.println(node.professor.name() + " - " + node.professor.phdYear());
@@ -495,5 +517,4 @@ public class PhDTree {
             printPhDTree(advisee, out);
         }
     }
-     */
 }

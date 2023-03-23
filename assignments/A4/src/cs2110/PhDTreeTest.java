@@ -21,9 +21,11 @@ public class PhDTreeTest {
     private static final Professor prof5 = new Professor("Michelle Gao", 2022);
     private static final Professor prof6 = new Professor("Isa Siu", 2024);
     
-    private static final Professor Prof_23 = new Professor("Prof_23", 2023);
+    private static final Professor Prof_22 = new Professor("Prof_22", 2025);
+    private static final Professor Prof_23 = new Professor("Prof_23", 2024);
     private static final Professor Prof_231 = new Professor("Prof_231", 2024);
     private static final Professor Prof_232 = new Professor("Prof_232", 2024);
+    private static final Professor Prof_2311 = new Professor("Prof_2311", 2025);
     private static final Professor Prof_23111 = new Professor("Prof_23111", 2025);
 
     // These helper methods create a copy of each Professor object, which would normally be seen as
@@ -82,18 +84,18 @@ public class PhDTreeTest {
         t.insert(prof1.name(), new Professor(prof2));
         t.insert(prof2.name(), new Professor(prof3));
         
-        t.insert(prof1.name(), new Professor("Prof_22", 2022));
-        t.insert(prof1.name(), Prof_23); // $$$ Just use the static value to be part of the tree instead of making a copy. $$$
+        t.insert(prof1.name(), new Professor(Prof_22));
+        //t.insert(prof1.name(), Prof_23); // $$$ Just use the static value to be part of the tree instead of making a copy. $$$
+        t.insert(prof1.name(), new Professor(Prof_23));
 
         ////System.out.println(t.toString());
 
+        t.insert("Prof_23", new Professor(Prof_232));
         t.insert("Prof_23", new Professor(Prof_231));
         t.insert("Prof_231", new Professor("Prof_2311", 2024));
         t.insert("Prof_2311", new Professor(Prof_23111));
-        t.insert("Prof_23", new Professor(Prof_232));
 
         return t;
-
     }
 
     @Test
@@ -243,44 +245,87 @@ public class PhDTreeTest {
 
     @Test
     public void testPrintProfessors() throws NotFound {
-        {  // Restrict scope to one test case
-            PhDTree t = tree3();
-
-            // A StringWriter lets us capture output that might normally be written to a file, or
-            // printed on the console, in a String instead.
-            StringWriter out = new StringWriter();
-
-            // Need to wrap our Writer in a PrintWriter to satisfy `printProfessors()` (but we save
-            // the original StringWriter so we can access its string later).  Flush the PrintWriter
-            // when we are done with it.
-            PrintWriter pw = new PrintWriter(out);
-            t.printProfessors(pw);
-            pw.flush();
-
-            // Split string into lines for easy comparison ("\\R" is a "regular expression" that
-            // matches both Windows and Unix line separators; it only works in methods like
-            // `split()`).
-            String[] lines = out.toString().split("\\R");
-            String[] expected = {
-                    "Amy Huang - 2023",
-                    "Maya Leong - 2023",
-                    "Matthew Hui - 2025"
-            };
-            assertArrayEquals(lines, expected);
-
-            //TO DO #### printProfessors() has issue ###
-            PhDTree tx = mytree();
-            tx.printProfessors(pw);
-            lines = out.toString().split("\\R");
-            
-            for(var str : lines){
-                System.out.println(str);
-            }
-
+        PhDTree t = tree3();        
+        String[] expected = {
+                "Amy Huang - 2023",
+                "Maya Leong - 2023",
+                "Matthew Hui - 2025"
+        };
+        String[] lines = _PrintTree(t);        
+        assertArrayEquals(lines, expected);
+        
+        // Print the output to console
+        for(var str : lines){
+            System.out.println(str);
         }
+
+        t = mytree();
+        String[] expected2 = {
+            "Amy Huang - 2023",
+            "Maya Leong - 2023",
+            "Matthew Hui - 2025",
+            "Prof_23 - 2024",
+            "Prof_231 - 2024",
+            "Prof_2311 - 2024",
+            "Prof_23111 - 2025",
+            "Prof_232 - 2024",
+            "Prof_22 - 2025"
+        };
+        lines = _PrintTree(t);        
+        assertArrayEquals(lines, expected2);
+        
+        // Print the output to console
+        for(var str : lines){
+            System.out.println(str);
+        }
+
+/*==== Hide original given code === *
+        // Restrict scope to one test case
+        // A StringWriter lets us capture output that might normally be written to a file, or
+        // printed on the console, in a String instead.
+        StringWriter out = new StringWriter();
+
+        // Need to wrap our Writer in a PrintWriter to satisfy `printProfessors()` (but we save
+        // the original StringWriter so we can access its string later).  Flush the PrintWriter
+        // when we are done with it.
+        PrintWriter pw = new PrintWriter(out);
+        t.printProfessors(pw);
+        pw.flush();
+
+        // Split string into lines for easy comparison ("\\R" is a "regular expression" that
+        // matches both Windows and Unix line separators; it only works in methods like
+        // `split()`).
+        String[] lines = out.toString().split("\\R");
+        assertArrayEquals(lines, expected);
+
+        out.flush();
+        pw.flush();        
+/*==== Hide original given code === */
+
+    }
 
         // TODO: Add three additional tests of `commonAncestor()` using your own tree(s)
         // Feel free to define a helper method to avoid duplicated testing code.
 
+     /**
+      *  helper method to output a tree to String[] *   
+      * */
+    private String[] _PrintTree(PhDTree tree) {
+        // A StringWriter lets us capture output that might normally be written to a file, or
+        // printed on the console, in a String instead.
+        StringWriter out = new StringWriter();
+
+        // Need to wrap our Writer in a PrintWriter to satisfy `printProfessors()` (but we save
+        // the original StringWriter so we can access its string later).  Flush the PrintWriter
+        // when we are done with it.
+        PrintWriter pw = new PrintWriter(out);
+        tree.printProfessors(pw);
+        pw.flush();
+
+        // Split string into lines for easy comparison ("\\R" is a "regular expression" that
+        // matches both Windows and Unix line separators; it only works in methods like
+        // `split()`).
+        String[] lines = out.toString().split("\\R");    
+        return lines;  
     }
 }
