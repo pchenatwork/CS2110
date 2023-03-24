@@ -90,6 +90,12 @@ public class CsvJoinTest {
         /* --- */
 
         // TODO: Run at least two of your own input-tests here
+
+        testJoinHelper("example");
+        testJoinHelper("states");
+        testJoinHelper("basketball");
+        testJoinHelper("courses");
+
         testJoinHelper("Right-Empty-Test");
         testJoinHelper("Left-Multi-Right-Multi-Test");       
         testJoinHelper("StudentCourse");      

@@ -21,6 +21,7 @@ public class PhDTreeTest {
     private static final Professor prof5 = new Professor("Michelle Gao", 2022);
     private static final Professor prof6 = new Professor("Isa Siu", 2024);
     
+    // New nodes to build custom Prof tree
     private static final Professor Prof_22 = new Professor("Prof_22", 2025);
     private static final Professor Prof_23 = new Professor("Prof_23", 2024);
     private static final Professor Prof_231 = new Professor("Prof_231", 2024);
@@ -92,7 +93,7 @@ public class PhDTreeTest {
 
         t.insert("Prof_23", new Professor(Prof_232));
         t.insert("Prof_23", new Professor(Prof_231));
-        t.insert("Prof_231", new Professor("Prof_2311", 2024));
+        t.insert("Prof_231", new Professor(Prof_2311));
         t.insert("Prof_2311", new Professor(Prof_23111));
 
         return t;
@@ -121,6 +122,9 @@ public class PhDTreeTest {
 
         t.insert(prof1.name(), Prof_231); // $$$ attach Prof_231 to Prof1(root)
         assertEquals(2, t.numAdvisees()); // $$$now advisees == 2
+
+        t.insert(prof1.name(), Prof_2311); // $$$ attach Prof_2311 to Prof1(root)
+        assertEquals(3, t.numAdvisees()); // $$$now advisees == 3
 
         t = mytree(); // $$$ t pointing to mytree()
         assertEquals(3, t.numAdvisees());
@@ -156,6 +160,10 @@ public class PhDTreeTest {
 
         t = mytree(); //
         assertEquals(5, t.maxDepth());
+        
+        t.insert(Prof_23111.name(), prof4); // Attach a new leaf to the longest branch
+        // depth should be 5+1 = 6 now
+        assertEquals(6, t.maxDepth());
     }
 
     @Test
@@ -208,8 +216,8 @@ public class PhDTreeTest {
         // TODO: Add three additional tests of `findAdvisor()` using your own tree(s)
 
         PhDTree tx = mytree();
-        assertEquals(Prof_23, tx.findAdvisor(Prof_232.name()));  // leaf node
-        assertEquals(prof1, tx.findAdvisor(Prof_23.name()));  // middle node
+        assertEquals(Prof_23, tx.findAdvisor(Prof_232.name()));  // test on finding Advisor on leaf node
+        assertEquals(prof1, tx.findAdvisor(Prof_23.name()));  // test on finding Advisor on middle node
     }
 
     @Test
@@ -222,6 +230,18 @@ public class PhDTreeTest {
         assertEquals(lineage1, t.findAcademicLineage(prof3.name()));
 
         // TODO: Add three additional tests of `findAcademicLineage()` using your own tree(s)
+        t = mytree();         
+        List<Professor> lineage2 = new LinkedList<>();
+        lineage2.add(prof1);
+        assertEquals(lineage2, t.findAcademicLineage(prof1.name())); // on root node
+        lineage2.add(Prof_23);
+        assertEquals(lineage2, t.findAcademicLineage(Prof_23.name())); // on middle node
+        lineage2.add(Prof_231);
+        assertEquals(lineage2, t.findAcademicLineage(Prof_231.name()));
+        lineage2.add(Prof_2311);
+        assertEquals(lineage2, t.findAcademicLineage(Prof_2311.name()));
+        lineage2.add(Prof_23111);
+        assertEquals(lineage2, t.findAcademicLineage(Prof_23111.name())); // on leaf node
 
     }
 
@@ -240,11 +260,14 @@ public class PhDTreeTest {
 
         t3 = mytree();
         assertEquals(Prof_23, t3.commonAncestor(Prof_23111.name(), Prof_232.name()));  // middle node
-        assertEquals(Prof_23, t3.commonAncestor(Prof_23.name(), Prof_232.name()));  // middle node
+        assertEquals(Prof_23, t3.commonAncestor(Prof_23.name(), Prof_232.name()));  // middle node        
+        assertEquals(prof1, t3.commonAncestor(Prof_23111.name(), prof3.name()));  //  ancestor (root) for two most distant nodes
+
     }
 
     @Test
     public void testPrintProfessors() throws NotFound {
+        //$$$ Using a helper _PrintTree() to test this method
         PhDTree t = tree3();        
         String[] expected = {
                 "Amy Huang - 2023",
