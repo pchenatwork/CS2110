@@ -3,3 +3,5 @@ https://www.programiz.com/java-programming/hashset
 
 Hash Table/Function
 
+_Notes.txt in [src] folder caused lots of exception that have no trace....
+

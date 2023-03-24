@@ -206,14 +206,18 @@ public class PhDTree {
         /*#####
          * 
          */
+        PhDTree tree = null;
         if (this.professor.name().equals(targetName)) {
-            return this;
+            tree = this;
         } else {
             for (PhDTree advisee : advisees) {
                 // loop through every items in PhDTree.advisees[] to find a hit
                 try{
                     // using the try-catch to make sure every 'advisee' are examed.. 
-                    return advisee.findTree(targetName);
+                    tree = advisee.findTree(targetName);
+                    if(tree!=null) {
+                        return tree; // sub-tree found, no need to go over the rest. exit the loop
+                    } 
                 } 
                 catch (NotFound exc) {
                    // do nothing , this is to make sure all sub-routine will be executed
@@ -223,7 +227,8 @@ public class PhDTree {
         }
         // Only the TOP-MOST findTree() call will throw this exception. 
         // All NotFound() Exceptions from sub-routine findTree() call are muted by try-catch{}
-        throw new NotFound();
+        if (tree==null)  throw new NotFound();
+        return tree;
     }
 
     /**
@@ -390,12 +395,20 @@ public class PhDTree {
         throw new NotFound();
         //* ================== This implementation return the first hit, WRONG !!!! */
 
+        /*$$$$ convert List<> to Array[] such that we can access throught array index *****/
         var left = findAcademicLineage(prof1Name).toArray();
         var right = findAcademicLineage(prof2Name).toArray();
+
+        // We only need to loop through the first MIN (left.length, right.length) elements of the array[]
+        /**$$$ eg lst1: A->B->C
+                  lst2: A->B->M->N->X->Y->Z  
+        //    we only need to iterate through the first MIN(3, 7) = 3  element to locate the commonAncesstor
+              **/
+        Integer iMinSize = left.length > right.length? right.length : left.length;
         Professor _commonAncestor = null ; // Assume no common ancesstor
-        for(int i = 0; i< left.length; i++){
+        for(int i = 0; i< iMinSize; i++){
             if(((Professor)left[i]).equals((Professor)right[i])){
-                // If left and right share the same ancesstor, the heading portion should overlap, 
+                // If left and right share the same ancesstor at Nth level, they share the same first Nth elements
                 // the last match is the common ancestor
                 _commonAncestor = (Professor)left[i]; 
             }

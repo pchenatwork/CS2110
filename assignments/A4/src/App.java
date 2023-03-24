@@ -56,7 +56,7 @@ hash = g * hash + s.charAt(i);
      * 
      * </pre>
      */
-    private static PhDTree tree1() throws NotFound {
+    private static PhDTree treeXXX() throws NotFound {
         PhDTree t = new PhDTree(Prof_0);
         t.insert(Prof_0.name(), Prof_3);
         t.insert(Prof_0.name(), Prof_2);

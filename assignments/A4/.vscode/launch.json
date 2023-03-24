@@ -6,40 +6,15 @@
     "configurations": [
         {
             "type": "java",
-            "name": "App",
+            "name": "PhDApp",
             "request": "launch",
-            "mainClass": "App",
-            "projectName": "A4_42b9d18b"
-        },
-        {
-            "type": "java",
-            "name": "Current File",
-            "request": "launch",
-            "mainClass": "${file}"
-        },
-        {
-            "type": "java",
-            "name": "App",
-            "request": "launch",
-            "mainClass": "App",
-            "projectName": "AX_42b9d1af"
-        },
-        {
-            "type": "java",
-            "name": "A1",
-            "request": "launch",
-            "mainClass": "cs2110.A1",
-            "projectName": "AX_42b9d1af"
-        },
-        {
-            "type": "java",
-            "name": "CsvJoin",
-            "request": "launch",
-            "mainClass": "cs2110.CsvJoin",
-            "projectName": "AX_42b9d1af",
+            "mainClass": "cs2110.PhDApp",
+            "projectName": "A4_42b9d18b",
             "args": [
-                "Demo.xml",
-                "42"
+                "C:/.Repos/pchenatwork/CS2110_/assignments/A4/tests/professors.csv"
+            ],
+            "argsXXX": [
+                "C:/.Repos/pchenatwork/CS2110_/assignments/A4/tests/professors-shortened.csv"
             ]
         }
     ]

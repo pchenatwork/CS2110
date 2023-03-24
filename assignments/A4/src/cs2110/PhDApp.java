@@ -56,8 +56,7 @@ public class PhDApp {
      * Name of the file to read the genealogy tree from.  Defaults to "professors.csv" in the
      * current working directory.
      */
-    private String csvFileName = "professors.csv";
-
+    private String csvFileName = "professors.csv"; 
     /**
      * The academic genealogy tree to be read and queried.
      */
@@ -127,22 +126,44 @@ public class PhDApp {
         }
     }
 
-    /**
-     * Returns a PhDTree representation of the CSV file named by filename.  Throws
-     * `InputFormatException` if the file format is invalid or represents an invalid tree.
-     */
     public static PhDTree csvToTree(Reader in) throws InputFormatException {
-        try (Scanner sc = new Scanner(in)) {
+        try ( Scanner sc = new Scanner(in)) {  /*$$$ Reading :  https://www.baeldung.com/java-try-with-resources $$$ */
+            
             // Read and validate header
             String[] header = sc.nextLine().split(",", -1);
             if (!Arrays.equals(header, new String[]{"advisee", "year", "advisor"})) {
                 throw new InputFormatException("Unexpected header");
             }
 
-            // TODO 10: Implement the remainder of this method according to its specification.
-            // Use `sc` to read lines and `split()` to separate fields.
-            // Remember that the first line after the header is special - it represents the root.
-            throw new UnsupportedOperationException();
+            String sAdvisor, sAdvisee;
+            PhDTree tree = null;
+            int iPhdYear;
+            if (sc.hasNext()) { 
+                // $$$ create a new tree from first line after header line
+                header = sc.nextLine().split(",", -1); //$$$ reuse 'header' local variable to capture the values from nextLine()
+                sAdvisee = header[0];
+                iPhdYear = Integer.parseInt(header[1]);
+                sAdvisor = header[2];
+                
+                tree = new PhDTree(new Professor(sAdvisee, iPhdYear));
+            }
+
+            while(tree != null && sc.hasNext()){
+                // built tree from the rest of the lines
+                header = sc.nextLine().split(",", -1); // reuse 'header' local variable to capture the values from nextLine()
+                sAdvisee = header[0];
+                iPhdYear = Integer.parseInt(header[1]);
+                sAdvisor = header[2];
+
+                try {
+                    tree.insert(sAdvisor, new Professor(sAdvisee, iPhdYear));
+                }
+                catch (NotFound exc) {
+                    System.out.println(String.format("csvToTree() at tree.insert() throw NotFound exception. Advisee='%s'' , PhdYear=%d, Advisor='%s'", 
+                        sAdvisee, iPhdYear, sAdvisor));
+                }
+            }
+            return tree;
         }
     }
 
@@ -277,8 +298,14 @@ public class PhDApp {
         }
         String targetName = arg.trim();
 
-        // TODO 11: Complete this method to satisfy the application requirements.
-        throw new UnsupportedOperationException();
+        // TO====DO 11: Complete this method to satisfy the application requirements.
+        // throw new UnsupportedOperationException();
+        
+        if (professorTree.contains(targetName)){
+            System.out.println("'" + targetName + "' exists in the tree."); 
+        } else {
+            System.out.println("'" + targetName + "' does not exist in the tree."); 
+        }
     }
 
     /**
@@ -286,8 +313,11 @@ public class PhDApp {
      * contain a single professor's name (surrounding whitespace is ignored).
      */
     public void doSize(String arg) {
-        // TODO 12: Implement this method to satisfy the application requirements.
-        throw new UnsupportedOperationException();
+        // TO===DO 12: Implement this method to satisfy the application requirements.
+        //throw new UnsupportedOperationException();
+
+        int iSize = professorTree.size();
+        System.out.println(String.format("The size of the tree is : %d", iSize)); 
     }
 
     /**
@@ -295,8 +325,20 @@ public class PhDApp {
      * if `arg` does not contain a single professor's name (surrounding whitespace is ignored).
      */
     public void doAdvisor(String arg) {
-        // TODO 13: Implement this method to satisfy the application requirements.
-        throw new UnsupportedOperationException();
+        // TO===DO 13: Implement this method to satisfy the application requirements.
+        // throw new UnsupportedOperationException();
+        if (arg.isEmpty()) {
+            throw new IllegalArgumentException("Missing argument");
+        }
+        String targetName = arg.trim();
+
+        try {
+            Professor advisor = professorTree.findAdvisor(targetName);
+            System.out.println(String.format("Advisor to '%s' is '%s'", targetName, advisor.name()));
+
+        } catch (NotFound exc) {
+            System.out.println("'" + targetName + "' does not exist in the tree.");
+        }
     }
 
     /**
@@ -310,9 +352,17 @@ public class PhDApp {
         if (profNames.length != 2) {
             throw new IllegalArgumentException("Missing arguments");
         }
+        // TO===DO 14: Complete this method to satisfy the application requirements.
+        //throw new UnsupportedOperationException();
+        String advisee1 = profNames[0];
+        String advisee2 = profNames[1];        
+        try {
+            Professor advisor = professorTree.commonAncestor(advisee1, advisee2);
+            System.out.println(String.format("Common ancestor to '%s' and '%s' is '%s'", advisee1, advisee2, advisor.name()));
 
-        // TODO 14: Complete this method to satisfy the application requirements.
-        throw new UnsupportedOperationException();
+        } catch (NotFound exc) {
+            System.out.println(String.format("Common ancestor to '%s' and '%s' is not found", advisee1, advisee2));
+        }
     }
 
     /**
@@ -320,7 +370,19 @@ public class PhDApp {
      * if `arg` does not contain a single professor's name (surrounding whitespace is ignored).
      */
     public void doLineage(String arg) {
-        // TODO 15: Implement this method to satisfy the application requirements.
-        throw new UnsupportedOperationException();
+        // TO===DO 15: Implement this method to satisfy the application requirements.
+        //throw new UnsupportedOperationException();
+        if (arg.isEmpty()) {
+            throw new IllegalArgumentException("Missing argument");
+        }
+        String targetName = arg.trim(); 
+        try {
+            var lst = professorTree.findAcademicLineage(targetName);
+            for(var prof : lst) {
+                System.out.println(prof.toString());
+            }
+        } catch (NotFound exc) {
+            System.out.println(String.format("'%s' is not found", targetName));
+        }
     }
 }
