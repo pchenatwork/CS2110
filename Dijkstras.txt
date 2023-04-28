@@ -1,1 +1,8 @@
 https://www.techiedelight.com/single-source-shortest-paths-dijkstras-algorithm/
+
+https://www.cs.utexas.edu/users/EWD/PhDthesis/PhDthesis.PDF
+
+https://www.cs.utexas.edu/users/EWD/
+
+https://www.cs.cornell.edu/courses/JavaAndDS/shortestPath/01shortestPathHistory.pdf
+
