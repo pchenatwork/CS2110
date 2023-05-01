@@ -1,5 +1,6 @@
 import java.util.*;
- 
+// https://www.techiedelight.com/single-source-shortest-paths-dijkstras-algorithm/
+
 // A class to store a graph edge
 class Edge
 {
@@ -82,6 +83,7 @@ class Main
  
         // stores predecessor of a vertex (to a print path)
         int[] prev = new int[n];
+        //-- prev = [[-1],[-1],[-1],.n..,[-1]]
         prev[source] = -1;
  
         // run till min-heap is empty

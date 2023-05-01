@@ -54,7 +54,14 @@ public class ShortestPathsTest {
     void lectureNotesTest() {
         TestGraph graph = testGraph1();
         ShortestPaths<String, int[]> ssp = new ShortestPaths<>(graph);
-        ssp.singleSourceDistances("a");
+        /*==++== **PCHEN** study the behavior of the calss "ShortestPaths()" first ==++== **
+        first step is call "singleSourceDistances()", which triggers the preperation of internal Models:
+        1. Map<Vertex, Double> distances
+        2. Map<Vertex, Edge> bestEdges
+        ssp.bestPath() and ssp.getDistance() are all based on internal models "distances" & "bestEdges"
+        */
+        /*==++== the method take "Vertex" as the starting node  */
+        ssp.singleSourceDistances("a");  
         assertEquals(50, ssp.getDistance("g"));
         StringBuilder sb = new StringBuilder();
         sb.append("best path:");

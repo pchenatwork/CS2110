@@ -8,6 +8,9 @@ import java.util.ArrayList;
  */
 public class SlowPQueue<E> implements PQueue<E> {
 
+    //==++== https://www.baeldung.com/java-record-keyword ==++==
+    //==++== getters : PrioElem.elem  PrioElem.priority ==++==
+    //==++== **PCHEN** We can use LinkedList to re-implement the PriorityQueur **  ==++== 
     record PrioElem<E>(E elem, double priority) {}
 
     /** Contains all the elements in the queue, along with their
@@ -39,6 +42,7 @@ public class SlowPQueue<E> implements PQueue<E> {
     @Override
     public void add(E e, double priority) throws IllegalArgumentException {
         for (PrioElem<E> pe : data) {
+            //==++== Making sure we are not adding an already-exist Elem
             if (pe.elem.equals(e)) throw new IllegalArgumentException();
         }
         data.add(new PrioElem<>(e, priority));
@@ -61,6 +65,7 @@ public class SlowPQueue<E> implements PQueue<E> {
         for (int i = 0; i < data.size(); i++) {
             PrioElem<E> pe = data.get(i);
             if (pe.elem.equals(e)) {
+                //==++== Create a new PrioElem() with new 'Priority', then replace the data[i] with the new one
                 data.set(i, new PrioElem<>(e, priority));
                 return;
             }

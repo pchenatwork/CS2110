@@ -2,6 +2,8 @@ package graph;
 
 import datastructures.PQueue;
 import datastructures.SlowPQueue;
+import game.Edge;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +23,14 @@ public class ShortestPaths<Vertex, Edge> {
     /**
      * The model for treating types Vertex and Edge as forming a weighted directed graph.
      */
+    /*==+== *PCHEN* final keyword make 'graph' not changeable during the life-span of the object, 
+     * it can only be initialized in constructor ** ==++==
+     */
     private final WeightedDigraph<Vertex, Edge> graph;
 
+    /** PCHEN Reading ** https://www.javatpoint.com/map-and-hashmap-in-java */
+    /*==++== "Map" is an interface in Java used to map the key-pair values ==++== */
+    /*==++== "HashMap" is a class of Java collection framework, (An implementation of Interface Map) ==++== */
     /**
      * The distance to each vertex from the source.
      */
@@ -52,6 +60,49 @@ public class ShortestPaths<Vertex, Edge> {
         distances = new HashMap<>();
         bestEdges = new HashMap<>();
            // TODO: Complete computation of distances and best-path edges
+
+        frontier.add(source, 0); //== ini PriorityQueue with "Source" node
+        distances.put(source, 0.0);  //== Set distance of "source"->"source" = 0
+        bestEdges.put(source, null) ; //== Best Edge to arrive "source" is null
+
+        // boolean value to indicate the vertices for which minimum cost is found
+        HashMap<Vertex, Boolean> founded = new HashMap<>();
+        founded.put(source, true);  // "Node" Source's min cost is already known (==0)        
+        
+        while (!frontier.isEmpty()){ //== run till the PriorityQueue is empty
+            // Exam the node with MinPriority ( Priority 1 > Priority 2),
+            // extractMin() operation will remove the vertex with minPriority from PriorityQueue         
+            Vertex fromNode = frontier.extractMin();  
+            // Get all outgoing Edges that are originated from "v"
+            Iterable<Edge> outEdges = graph.outgoingEdges(fromNode);
+            // do for each "Dest Nodes" from "node"
+            for (Edge edge: outEdges){
+                Vertex toNode = graph.dest(edge);
+
+                // if the 'dest' node doesn't exist in :
+                // founded[dest]/distances[dest]/bestEdge[dest], 
+                // create these entries with default values
+                // "False (Not Found)/MaxDouble/edge"
+                if (!founded.containsKey(toNode))
+                    founded.put(toNode, false);
+                if (!distances.containsKey(toNode))
+                    distances.put(toNode, Double.MAX_VALUE);    
+                if (!bestEdges.containsKey(toNode))
+                    bestEdges.put(toNode, edge);                    
+
+                // Relaxation step
+                if (!founded.get(toNode) && (distances.get(fromNode) + graph.weight(edge)) < distances.get(toNode))
+                {
+                    distances.put(toNode, distances.get(fromNode) + graph.weight(edge));
+                    bestEdges.put(toNode, edge);
+                    frontier.add(toNode, distances.get(toNode));
+                }
+            }
+            
+            // mark vertex `fromNode` as done so it will not get picked up again
+            founded.put(fromNode, true);
+        }
+
     }
 
     /**

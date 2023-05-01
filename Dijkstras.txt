@@ -6,3 +6,5 @@ https://www.cs.utexas.edu/users/EWD/
 
 https://www.cs.cornell.edu/courses/JavaAndDS/shortestPath/01shortestPathHistory.pdf
 
+Point of interest:
+1. Dijkstra’s Algorithm is based on the principle of relaxation
