@@ -7,6 +7,8 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -80,24 +82,35 @@ public class ShortestPathsTest {
     /**
      * == Notes from PCHEN ==
      * myEdge is a custom POCO reprsentation of an "Edge"
-     * The purpose is to test the "Generic" part of the class. aka "implements WeightedDigraph<String, myEdge>""
+     * It is used to test the "Generic" portion of "WeightedDigraph{@code <Vertice, Edge>}>""
      */
-    static class myEdge{
-        private String _from, _to;
-        private double _distance;
-        public myEdge(String from, String to, double distance){
-            _distance = distance;
+    static class myEdge<V>{
+        private V _from, _to;
+        private double _weight;
+        public myEdge(V from, V to, double weight){
+            _weight = weight;
             _from = from;
             _to = to;
         }
         
-        public String From() { return _from ;}
-        public String To() { return _to; }
-        public double Distance() {return _distance;}
+        public V From() { return _from ;}
+        public V To() { return _to; }
+        public double Weight() {return _weight;}
+    }
+    static class myNode{
+        private final String _name;
+        public myNode(String name){
+            _name = name;
+        };
+        @Override
+        public String toString() {
+            return _name;
+        }
     }
     /**
      * myGraph is using the custom POCO myEdge to define the graph
-     */
+     * This works also, but the V(Vertice) is limited to "String" type
+     *
     static class myGraph implements WeightedDigraph<String, myEdge> {
         Iterable<myEdge> edges;
         String[] vertices;
@@ -117,42 +130,149 @@ public class ShortestPathsTest {
         public Iterable<myEdge> outgoingEdges(String vertex) { return outgoing.get(vertex); }
         public String source(myEdge edge) { return edge.From(); }
         public String dest(myEdge edge) { return edge.To(); }
-        public double weight(myEdge edge) { return edge.Distance(); }
-    }    
-    static myGraph myGraph1() {
-         myEdge[] myEdges = {
-            new myEdge("a", "b", 9.1), new myEdge("a", "c", 14.1), new myEdge("a", "d", 15.1),
-            new myEdge("b", "e", 23.2), 
-            new myEdge("c", "e", 17.3), new myEdge("c", "d", 5.3), new myEdge("c", "f", 30.3),
-            new myEdge("d", "f", 20.4), new myEdge("d", "g", 37.4),
-            new myEdge("e", "f", 3.5), new myEdge("e", "g", 20.5), 
-            new myEdge("f", "g", 16.6)
-        };
-        return new myGraph(vertices1, Arrays.asList(myEdges));
-    };
+        public double weight(myEdge edge) { return edge.weight(); }
+    }   **/
+
+    /**
+     * myGraph is using the custom POCO myEdge to define the graph
+     * It only needs a list of 'myEdges' to define a graph.
+     * each 'myEdges' has 
+     * 1. From()
+     * 2. To()
+     * 3. Weight()
+     * @param <V> Vertice can be any object
+     */
+    static class myGraph<V> implements WeightedDigraph<V, myEdge<V>> {
+        Iterable<myEdge<V>> edges;
+        String[] vertices;
+        Map<V, Set<myEdge<V>>> outgoing;
+
+        myGraph(Iterable<myEdge<V>> edges) {
+            this.edges = edges;
+            this.outgoing = new HashMap<>();
+            for (myEdge<V> edge : edges){
+                // use outgoing{} to define all vertices and its outgoing 'Edges'
+                // Key is the vertice name
+                // value is a Map<myEdge>
+                if (!outgoing.containsKey(edge.From())) {
+                    outgoing.put(edge.From(), new HashSet<>());
+                }
+                if (!outgoing.containsKey(edge.To())) {
+                    outgoing.put(edge.To(), new HashSet<>());
+                }
+                outgoing.get(edge.From()).add(edge);
+            }
+        }
+        public Iterable<myEdge<V>> outgoingEdges(V vertex) { return outgoing.get(vertex); }
+        public V source(myEdge<V> edge) { return edge.From(); }
+        public V dest(myEdge<V> edge) { return edge.To(); }
+        public double weight(myEdge<V> edge) { return edge.Weight(); }
+    } ;
+    
+    @Test
+    /**
+     * * Testing on the generic portion of the Graph.
+     * "Vertice" is just a String.
+     */
+    void mySspTestUsingGenericObject1() { 
+        //Step 1: defined all the Nodes, each "Vertice" is just a String
+        var a = "a";
+        var b = "b";
+        var c = "c";
+        var d = "d";
+        var e = "e";
+        var f = "f";
+        var g = "g";
+        //step 2: defined all the Edges 
+        List<myEdge<String>> edges = new ArrayList<myEdge<String>>();
+        edges.add(new myEdge<>(a, b, 9.1));
+        edges.add(new myEdge<>(a, c, 14.1));
+        edges.add(new myEdge<>(a, d, 15.1));
+        edges.add(new myEdge<>(b, e, 23.2));
+        edges.add(new myEdge<>(c, e, 17.3));
+        edges.add(new myEdge<>(c, d, 5.3));
+        edges.add(new myEdge<>(c, f, 30.3));
+        edges.add(new myEdge<>(d, f, 20.4));
+        edges.add(new myEdge<>(d, g, 37.4));
+        edges.add(new myEdge<>(e, f, 3.5));
+        edges.add(new myEdge<>(e, g, 20.5));
+        edges.add(new myEdge<>(f, g, 16.6));
+
+        //step 3: Create 'myGraph' object from the edges defined above
+        var graph = new myGraph<>(edges);
+        ShortestPaths<String, myEdge<String>> ssp = new ShortestPaths<String, myEdge<String>>(graph);   
+        
+        ssp.singleSourceDistances(a);  // myNode 'a' is the 
+
+        DecimalFormat fm = new DecimalFormat("##.000");        
+        assertEquals(fm.format(51.5), fm.format(ssp.getDistance(g)));
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path:");
+        for (var edge : ssp.bestPath(g)) {
+            sb.append(" " + edge.From());
+        }
+        sb.append(" " + g.toString());
+        assertEquals("best path: a c e f g", sb.toString());
+
+        sb.setLength(0); // reset the stringbuilder
+        for (var edge : ssp.bestPath(g)) {
+            sb.append(edge.From() + " -> " + edge.To() + " : " + edge.Weight() + "\n");
+        }
+        System.out.printf(sb.toString()); // To print out the path+weight in Debug Console to visualize the values
+    }
     
     @Test
     /**
      * myTest1 is using a custome graph (custom defined POCO edges using the same testing values)
+     * Testing on the generic portion of the Graph.
      */
-    void myTest1() { 
-        myGraph graph = myGraph1();
-        ShortestPaths<String, myEdge> ssp = new ShortestPaths<>(graph);      
-        ssp.singleSourceDistances("a");  
-        DecimalFormat f = new DecimalFormat("##.000");        
-        assertEquals(f.format(51.5), f.format(ssp.getDistance("g")));
+    void myTestUsingGenericObject1() { 
+        //Step 1: defined all the Nodes, now each 'Vertice' is from custom object (myNode)
+        var a = new myNode("a");
+        var b = new myNode("b");
+        var c = new myNode("c");
+        var d = new myNode("d");
+        var e = new myNode("e");
+        var f = new myNode("f");
+        var g = new myNode("g");
+        //step 2: defined all the Edges 
+        List<myEdge<myNode>> edges = new ArrayList<myEdge<myNode>>();
+        edges.add(new myEdge<>(a, b, 9.1));
+        edges.add(new myEdge<>(a, c, 14.1));
+        edges.add(new myEdge<>(a, d, 15.1));
+        edges.add(new myEdge<>(b, e, 23.2));
+        edges.add(new myEdge<>(c, e, 17.3));
+        edges.add(new myEdge<>(c, d, 5.3));
+        edges.add(new myEdge<>(c, f, 30.3));
+        edges.add(new myEdge<>(d, f, 20.4));
+        edges.add(new myEdge<>(d, g, 37.4));
+        edges.add(new myEdge<>(e, f, 3.5));
+        edges.add(new myEdge<>(e, g, 20.5));
+        edges.add(new myEdge<>(f, g, 16.6));
+
+        //step 3: Create 'myGraph' object from the edges defined above
+        var graph = new myGraph<>(edges);
+        ShortestPaths<myNode, myEdge<myNode>> ssp = new ShortestPaths<myNode, myEdge<myNode>>(graph);   
+        
+        ssp.singleSourceDistances(a);  // myNode 'a' is the 
+
+        DecimalFormat fm = new DecimalFormat("##.000");        
+        assertEquals(fm.format(51.5), fm.format(ssp.getDistance(g)));
+
         StringBuilder sb = new StringBuilder();
         sb.append("best path:");
-        for (myEdge e : ssp.bestPath("g")) {
-            sb.append(" " + e.From());
+        for (myEdge<myNode> edge : ssp.bestPath(g)) {
+            sb.append(" " + edge.From());
         }
-        sb.append(" g");
+        sb.append(" " + g.toString());
         assertEquals("best path: a c e f g", sb.toString());
 
         sb.setLength(0); // reset the stringbuilder
-        for (myEdge e : ssp.bestPath("g")) {
-            sb.append(e.From() + " -> " + e.To() + " : " + e.Distance() + "\n");
+        for (myEdge<myNode> edge : ssp.bestPath(g)) {
+            sb.append(edge.From() + " -> " + edge.To() + " : " + edge.Weight() + "\n");
         }
         System.out.printf(sb.toString()); // To print out the path+weight in Debug Console to visualize the values
     }
+    
 }
