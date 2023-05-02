@@ -93,25 +93,25 @@ class Main
             Node node = minHeap.poll();
  
             // get the vertex number
-            int u = node.vertex;
+            int fromNode = node.vertex;
  
-            // do for each neighbor `v` of `u`
-            for (Edge edge: graph.adjList.get(u))
+            // do for each neighbor `v` of `fromNode`
+            for (Edge edge: graph.adjList.get(fromNode))
             {
-                int v = edge.dest;
+                int toNode = edge.dest;
                 int weight = edge.weight;
  
                 // Relaxation step
-                if (!done[v] && (dist.get(u) + weight) < dist.get(v))
+                if (!done[toNode] && (dist.get(fromNode) + weight) < dist.get(toNode))
                 {
-                    dist.set(v, dist.get(u) + weight);
-                    prev[v] = u;
-                    minHeap.add(new Node(v, dist.get(v)));
+                    dist.set(toNode, dist.get(fromNode) + weight);
+                    prev[toNode] = fromNode;
+                    minHeap.add(new Node(toNode, dist.get(toNode)));
                 }
             }
  
-            // mark vertex `u` as done so it will not get picked up again
-            done[u] = true;
+            // mark vertex `fromNode` as done so it will not get picked up again
+            done[fromNode] = true;
         }
  
         List<Integer> route = new ArrayList<>();
