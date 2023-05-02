@@ -257,6 +257,11 @@ public class ShortestPathsTest {
         edges.add(new myEdge<>(e, f, 3.5));
         edges.add(new myEdge<>(e, g, 20.5));
         edges.add(new myEdge<>(f, g, 16.6));
+        
+        edges.add(new myEdge<>(b, a, 9));
+        edges.add(new myEdge<>(e, c, 9));
+        edges.add(new myEdge<>(f, c, 9));
+       // edges.add(new myEdge<>(a, e, 30));
 
         //step 3: Create 'myGraph' object from the edges defined above
         var graph = new myGraph<>(edges);
