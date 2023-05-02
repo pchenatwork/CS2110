@@ -81,8 +81,13 @@ public class ShortestPathsTest {
     // TODO: Add 2 more tests
     /**
      * == Notes from PCHEN ==
-     * myEdge is a custom POCO reprsentation of an "Edge"
-     * It is used to test the "Generic" portion of "WeightedDigraph{@code <Vertice, Edge>}>""
+     * Custom POCO of an "Edge"
+     * Created to test the "Generic" portion of "WeightedDigraph{@code <Vertice, Edge>}"
+     * An 'myEdge' is defined as
+     * (1) From (a Vertice)
+     * (2) To (a Vertice)
+     * (3) Weight
+     * @param <V> Vertice object
      */
     static class myEdge<V>{
         private V _from, _to;
@@ -151,8 +156,10 @@ public class ShortestPathsTest {
             this.edges = edges;
             this.outgoing = new HashMap<>();
             for (myEdge<V> edge : edges){
-                // use outgoing{} to define all vertices and its outgoing 'Edges'
-                // Key is the vertice name
+                // use outgoing[] serves two purposes
+                // 1. all vertices and
+                // 2. its collection of outgoing 'Edges'
+                // Key is the vertice 
                 // value is a Map<myEdge>
                 if (!outgoing.containsKey(edge.From())) {
                     outgoing.put(edge.From(), new HashSet<>());
