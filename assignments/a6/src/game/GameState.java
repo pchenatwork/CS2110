@@ -432,6 +432,7 @@ public class GameState implements SeekState, ScramState {
 
     /**
      * Return the unique id of the current location.
+     * == Interface SeekState.currentLocation() ==
      */
     @Override
     public long currentLocation() {
@@ -448,6 +449,7 @@ public class GameState implements SeekState, ScramState {
      * distance from that node to the ring.
      */
     @Override
+    /* == Interface SeekState.neighbors() == */
     public Collection<NodeStatus> neighbors() {
         if (phase != Phase.SEEK) {
             throw new IllegalStateException(
@@ -475,6 +477,7 @@ public class GameState implements SeekState, ScramState {
      * Return the Manhattan distance from the current location to the ring location on the map.
      */
     @Override
+    /* == Interface SeekState.distanceToRing() == */
     public int distanceToRing() {
         if (phase != Phase.SEEK) {
             throw new IllegalStateException(
@@ -486,7 +489,8 @@ public class GameState implements SeekState, ScramState {
     }
 
     @Override
-    public Node currentNode() {
+    /* ==interface ScramState.currentNode()  == */
+    public Node currentNode() { // 
         if (phase != Phase.SCRAM) {
             throw new IllegalStateException("getCurrentNode: Error, " +
                     "current Node may not be accessed unless fleeing");
@@ -495,7 +499,8 @@ public class GameState implements SeekState, ScramState {
     }
 
     @Override
-    public Node exit() {
+    /* == interface ScramState.exit() == */
+    public Node exit() { 
         if (phase != Phase.SCRAM) {
             throw new IllegalStateException("getEntrance: Error, " +
                     "current Node may not be accessed unless fleeing");
@@ -504,7 +509,7 @@ public class GameState implements SeekState, ScramState {
     }
 
     @Override
-    public Collection<Node> allNodes() {
+    public Collection<Node> allNodes() { // interface ScramState.allNodes
         if (phase != Phase.SCRAM) {
             throw new IllegalStateException("getVertices: Error, " +
                     "Vertices may not be accessed unless fleeing");
@@ -517,8 +522,9 @@ public class GameState implements SeekState, ScramState {
      * IllegalArgumentException} if {@code n} is not neighboring. Increment the steps taken if
      * successful.
      */
-    @Override
-    public void moveTo(Node n) {
+    @Override    
+    /* == interface SeekState.moveTo() == */
+    public void moveTo(Node n) { // interface ScramState.moveTo()
         if (phase != Phase.SCRAM) {
             throw new IllegalStateException("Call moveTo(Node) only when fleeing!");
         }
@@ -555,8 +561,8 @@ public class GameState implements SeekState, ScramState {
     }
 
     @Override
-    /** Return the number of steps remaining to scram. */
-    public int stepsToGo() {
+    /** Return the number of steps remaining to scram. // interface ScramState.stepsToGo() */
+    public int stepsToGo() { 
         if (phase != Phase.SCRAM) {
             throw new IllegalStateException(
                     "stepsToGo() can be called only while fleeing!");

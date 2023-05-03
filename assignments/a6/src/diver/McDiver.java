@@ -1,5 +1,7 @@
 package diver;
 
+import java.util.HashSet;
+
 import game.*;
 
 
@@ -21,6 +23,27 @@ public class McDiver implements SewerDiver {
         // If you don't succeed, you can always use the first one.
         //
         // Use this same process on the second method, scram.
+
+        /****=== Note from PCHEN == **
+        Seems we need to implement some logic HERE ??? Depth First Search ???
+        to find the route from SeekSewer.entrance -> SeekSewer.ring
+        *****/
+        HashSet<Long> visited = new HashSet<>();
+        traversePreOrder(state, visited);
+    }
+
+    private void traversePreOrder(SeekState state, HashSet<Long> visited){
+        if (state.distanceToRing()==0) {
+            return; // ring found, exit routin
+        }
+        visited.add(state.currentLocation());
+        for ( NodeStatus neighor : state.neighbors()) {
+            if (!visited.contains(neighor.getId())){
+                // make sure to skip already visited Node
+                state.moveTo(neighor.getId());
+                traversePreOrder(state, visited);
+            }
+        }
     }
 
     /** See {@code SewerDriver} for specification. */
