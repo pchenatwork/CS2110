@@ -1,5 +1,6 @@
 package graph;
 
+import datastructures.MyPQueue;
 import datastructures.PQueue;
 import datastructures.SlowPQueue;
 import game.Edge;
@@ -56,7 +57,14 @@ public class ShortestPaths<Vertex, Edge> {
      */
     public void singleSourceDistances(Vertex source) {
         // Implementation constraint: use Dijkstra's single-source shortest paths algorithm.
-        PQueue<Vertex> frontier = new SlowPQueue<>();
+
+        //==========================================================================================
+        // == PCHEN 5/3 introduced a Linked-List implementation of "MyPQueue", so use here =======
+        //==========================================================================================
+        PQueue<Vertex> frontier = new MyPQueue<>();
+        // 
+        // PQueue<Vertex> frontier = new SlowPQueue<>();
+
         distances = new HashMap<>();
         bestEdges = new HashMap<>();
            // TODO: Complete computation of distances and best-path edges
