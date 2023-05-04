@@ -31,11 +31,11 @@ public class McDiver implements SewerDiver {
         Seems we need to implement some logic HERE ??? Depth First Search ???
         to find the route from SeekSewer.entrance -> SeekSewer.ring
         *****/
-        HashSet<Long> visited = new HashSet<>();        
+        HashSet<Long> visitedLocation = new HashSet<>();        
         MyStack<Long> myStack = new MyStack<>();
         
-        traverseMaze_V2(state, visited, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
-        //traverseMaze_V1(state, visited, myStack); // Version 1 : IT WORKS
+        traverseMaze_V2(state, visitedLocation, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
+        //traverseMaze_V1(state, visitedLocation, myStack); // Version 1 : IT WORKS
 
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
@@ -201,6 +201,30 @@ public class McDiver implements SewerDiver {
         // TODO: Get out of the sewer system before the steps are used up.
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
+        
+        HashSet<Node> visitedNodes = new HashSet<>();      
+        exit(state, visitedNodes);
     }
+    
+    
+    private boolean exit(ScramState state, HashSet<Node> visitedNodes){
+        var currentNode = state.currentNode();
+        if (currentNode == state.exit()){
+            return true;
+        }
+        visitedNodes.add(currentNode);
+
+        var x = state.allNodes();
+        long currLocationId = state.stepsToGo();
+        for(var visitingNode : state.currentNode().getNeighbors()){
+            if (!visitedNodes.contains(visitingNode)) {
+                state.moveTo(visitingNode);
+                if (exit(state, visitedNodes)) return true;
+            }
+        }
+        state.moveTo(currentNode);
+        return false;
+    }
+
 
 }
