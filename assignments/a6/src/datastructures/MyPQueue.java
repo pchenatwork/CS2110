@@ -95,4 +95,17 @@ public class MyPQueue<E> implements PQueue<E> {
         }
         assert false;
     }
+    /**
+     * equally add priority to all existing items in the queue.
+     * **Notes**: this is to be used in the McDiver.Seek() method
+     * @param priority
+     */
+    public void addPriority(double priority){
+        // Loop throught the list       
+        Node<PrioElem<E>> nodeRunning = _head; 
+        while (nodeRunning != null) {
+            changePriority(nodeRunning.data().elem, nodeRunning.data().priority + priority);
+            nodeRunning = nodeRunning.next();
+        }
+    }
 }

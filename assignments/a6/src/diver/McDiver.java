@@ -3,6 +3,7 @@ package diver;
 import java.util.Collection;
 import java.util.HashSet;
 
+import datastructures.MyPQueue;
 import datastructures.MyStack;
 import game.*;
 
@@ -32,7 +33,9 @@ public class McDiver implements SewerDiver {
         *****/
         HashSet<Long> visited = new HashSet<>();        
         MyStack<Long> myStack = new MyStack<>();
-        traverseMaze_Working(state, visited, myStack); // IT WORKS
+        
+        traverseMaze_V2(state, visited, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
+        //traverseMaze_V1(state, visited, myStack); // Version 1 : IT WORKS
 
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
@@ -51,6 +54,70 @@ public class McDiver implements SewerDiver {
         }
         return true;
     }
+    /**
+     * Version 2: Add PriorityQueue to the logic, Works better than V1, but still not the best
+     * @param state
+     * @param visitedSet : set of locationId that has been 'Visited'
+     * @param visitedStack : FILO stack store the current "root" of the 'neighbors' that is currently being visited
+     * @return
+     */
+    private boolean traverseMaze_V2(SeekState state, HashSet<Long> visitedSet, MyStack<Long> visitedStack){
+        if (state.distanceToRing()==0) {
+            return true;// ring found, exit routin
+        }
+
+        // log the location Id(neighborId) as "Visited"
+        visitedSet.add(state.currentLocation()); 
+
+        if (!isAllNeighborVisited(state.neighbors(), visitedSet)){
+            // push currentlocation to "trace stack", this is to 'Pop' the location when 'MoveBack" is needed'
+            visitedStack.push(state.currentLocation()); 
+
+            // Prioritize the neighbors to be visited according to the distance to 'ring'
+            // Only add 'neighors' not been visited yet
+            MyPQueue<NodeStatus> pQueue = new MyPQueue<>();
+            for ( NodeStatus neighor : state.neighbors()) {                
+                Long neighborId = neighor.getId();
+                if (!visitedSet.contains(neighborId)){
+                    double d = neighor.getDistanceToRing();
+                    pQueue.add(neighor, d);
+                }
+            }
+
+            while (!pQueue.isEmpty()) {
+                var neighor = pQueue.extractMin();
+                Long neighborId = neighor.getId();
+
+                state.moveTo(neighborId);  // move to New location (neighborid)
+                // Since a moveTo() is made, need to add one step to those distance in the pQueue
+                pQueue.addPriority(1);
+
+                // Since a moveTo is made, evaluate the "Priority" of the new neighbors-to-be-visited
+                // and add those NOT been Visited yet to PriorityQueue
+                for ( NodeStatus newNeighor : state.neighbors()) {   
+                    if (!visitedSet.contains(newNeighor.getId())){
+                        // Weight of the PriorityQueue item is the distance to Ring
+                        // ** Since this distance is counted after moveTo() step, no additional step to 'Priority' needs to be added.
+                        // All previously added items have already additional step added to their priority
+                        double d = newNeighor.getDistanceToRing(); 
+                        pQueue.add(newNeighor, d);
+                    }
+                }
+
+                if (traverseMaze_V2(state, visitedSet, visitedStack)){
+                    // exit the recursive if ring is found by moving to neighbor, otherwise keep looking
+                    return true;
+                }; 
+            }
+        }
+        else { // if All its neighbors were already visited, move back
+            state.moveTo(visitedStack.pop());
+            if (traverseMaze_V2(state, visitedSet, visitedStack)){
+                return true;
+            }; 
+        }  
+        return false;   
+    }
     
     /**
      * A recurrsive function to traverse the Maze ( game board)
@@ -59,7 +126,7 @@ public class McDiver implements SewerDiver {
      * @param trace
      * @return
      */
-    private boolean traverseMaze_Working(SeekState state, HashSet<Long> visited, MyStack<Long> trace){
+    private boolean traverseMaze_V1(SeekState state, HashSet<Long> visited, MyStack<Long> trace){
         if (state.distanceToRing()==0) {
             return true;// ring found, exit routin
         }
@@ -71,7 +138,7 @@ public class McDiver implements SewerDiver {
                 if (!visited.contains(neighborId)){
                     state.moveTo(neighborId);  // move to New location (neighborid)
                     visited.add(neighborId);   // log the new location(neighborId) as "Visied"
-                    if (traverseMaze_Working(state, visited, trace)){
+                    if (traverseMaze_V1(state, visited, trace)){
                         // exit the recursive if ring is found by moving to neighbor, otherwise keep looking
                         return true;
                     }; 
@@ -80,7 +147,7 @@ public class McDiver implements SewerDiver {
         }
         else { // if All its neighbors were already visited, move back
             state.moveTo(trace.pop());
-            if (traverseMaze_Working(state, visited, trace)){
+            if (traverseMaze_V1(state, visited, trace)){
                 return true;
             }; 
         }  
