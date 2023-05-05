@@ -2,6 +2,7 @@ package diver;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.prefs.BackingStoreException;
 
 import datastructures.MyPQueue;
 import datastructures.MyStack;
@@ -33,13 +34,43 @@ public class McDiver implements SewerDiver {
         *****/
         HashSet<Long> visitedLocation = new HashSet<>();        
         MyStack<Long> myStack = new MyStack<>();
+        MyPQueue pQueue = new MyPQueue<>();
         
+        //traverseMaze_v3(state, myStack);
         traverseMaze_V2(state, visitedLocation, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
         //traverseMaze_V1(state, visitedLocation, myStack); // Version 1 : IT WORKS
 
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
     }
+
+    private boolean traverseMaze_v3(SeekState state, MyStack<Long> visitedStack){
+        // not working yet !! 
+        if (state.distanceToRing()==0) {
+            return true;// ring found, exit routin
+        }
+        //put neighbors-to-be-visited in PriorityQueue based on distance to ring
+        MyPQueue<Long> pQueue = new MyPQueue<>();
+        for ( NodeStatus neighbor : state.neighbors()) {      
+            double d = neighbor.getDistanceToRing();
+            pQueue.add(neighbor.getId(), d);
+        }
+        while (!pQueue.isEmpty()) {  
+            // push current location to stack         
+            visitedStack.push(state.currentLocation()); 
+            var nextId = pQueue.extractMin();
+            state.moveTo(nextId);
+            if (traverseMaze_v3(state, visitedStack)) {
+                return true;
+            } else {
+                // if neighbors-to-be-visit is a dead search, move back to its parent step
+                var backId = visitedStack.pop();
+                state.moveTo(backId);
+            }
+        }
+        return false;
+    }
+
     /**
      * a helper method to check if All Neighors have been visited 
      * @param neighbors : Collection of 'NodeStatus'
@@ -75,22 +106,22 @@ public class McDiver implements SewerDiver {
 
             // Prioritize the neighbors to be visited according to the distance to 'ring'
             // Only add 'neighors' not been visited yet
-            MyPQueue<NodeStatus> pQueue = new MyPQueue<>();
+            MyPQueue<Long> pQueue = new MyPQueue<>();
             for ( NodeStatus neighor : state.neighbors()) {                
                 Long neighborId = neighor.getId();
                 if (!visitedSet.contains(neighborId)){
                     double d = neighor.getDistanceToRing();
-                    pQueue.add(neighor, d);
+                    pQueue.add(neighborId, d);
                 }
             }
 
             while (!pQueue.isEmpty()) {
-                var neighor = pQueue.extractMin();
-                Long neighborId = neighor.getId();
+                //var neighor = pQueue.extractMin();
+                Long neighborId = pQueue.extractMin();
 
                 state.moveTo(neighborId);  // move to New location (neighborid)
-                // Since a moveTo() is made, need to add one step to those distance in the pQueue
-                pQueue.addPriority(1);
+                // Since a moveTo() is made, need to add some extra weight to those distance from previous step in the pQueue
+                // *** no need to *** pQueue.addPriority(2);
 
                 // Since a moveTo is made, evaluate the "Priority" of the new neighbors-to-be-visited
                 // and add those NOT been Visited yet to PriorityQueue
@@ -100,7 +131,7 @@ public class McDiver implements SewerDiver {
                         // ** Since this distance is counted after moveTo() step, no additional step to 'Priority' needs to be added.
                         // All previously added items have already additional step added to their priority
                         double d = newNeighor.getDistanceToRing(); 
-                        pQueue.add(newNeighor, d);
+                        pQueue.add(newNeighor.getId(), d);
                     }
                 }
 
