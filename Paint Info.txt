@@ -43,3 +43,17 @@ Sherwin-Williams
 Wheat Penny : 976B53
 Reddened Earth : 9C6E63
 
+
+Thompsons Waterseal : Semi-transparent wood sealer
+Chestnut brown
+
+
+Cabot® Semi-Solid Oak Brown
+Cabot® Low-VOC Semi-Transparent Mission Brown
+Cabot® Low-VOC Semi-Transparent Cordovan Leather (Brown)
+
+
+PPG1074-7 Little Bear
+RGB: 89 65 56       https://convertingcolors.com/rgb-color-89_65_60.html
+-10% : 80 58 50 https://convertingcolors.com/rgb-color-80_58_50.html?search=RGB(80,%2058,%2050)
+-20% : 71 52 45

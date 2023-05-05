@@ -1,8 +1,9 @@
 package datastructures;
 
  //* ============ Notes: PCHEN ===========
- // Created a Linked-list stack (FILO) to track to visited 'floor tile' in the game board
- // Only push(), pop(), isEmpty() are needed for our usage
+ // A Linked-list stack (FILO)
+ // Introduce to track the current 'route' that has taken in the game board from Entrance
+ // push(), pop(), peek(), isEmpty() are exposed
  //* ======================================
  
 public class MyStack<T> {
@@ -22,13 +23,20 @@ public class MyStack<T> {
         _size = 0;
         _head = null;
     } 
-
+    /**
+     * Push an element into the Stack. The element gets pushed onto the top of the Stack.
+     * @param t
+     */
     public void push(T t){
         assert t!=null;  // make sure NULL object can not be pushed to the Stack
         Node<T> newNode = new Node<T>(t, _head);
         _head = newNode;
         _size++;
     }
+    /**
+     * Returns the element present at the top of the stack and then removes it.
+     * @return
+     */
     public T pop(){
         if (_head!=null){
             Node<T> node = _head;
@@ -36,6 +44,13 @@ public class MyStack<T> {
             _size --;
             return node.data();
         }
+        return null;
+    }
+    /**
+     * Returns the element at the top of the Stack else returns NULL if the Stack is empty.
+     */
+    public T peek(){
+        if (_head!=null) return _head.data();
         return null;
     }
     public boolean isEmpty(){return _size==0;}    

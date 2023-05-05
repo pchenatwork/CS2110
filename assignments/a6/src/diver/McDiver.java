@@ -2,11 +2,13 @@ package diver;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.prefs.BackingStoreException;
 
 import datastructures.MyPQueue;
 import datastructures.MyStack;
 import game.*;
+import graph.ShortestPaths;
 
 
 /** This is the place for your implementation of the {@code SewerDiver}.
@@ -233,29 +235,287 @@ public class McDiver implements SewerDiver {
         // DO NOT WRITE ALL THE CODE HERE. Instead, write your method elsewhere,
         // with a good specification, and call it from this one.
         
-        HashSet<Node> visitedNodes = new HashSet<>();      
-        exit(state, visitedNodes);
-    }
-    
-    
-    private boolean exit(ScramState state, HashSet<Node> visitedNodes){
-        var currentNode = state.currentNode();
-        if (currentNode == state.exit()){
+        /* since allNodes are known now, let's built the Maze graph from allNodes(); */
+        Maze mGraph = new Maze((Set<Node>) state.allNodes());
+        /* use the ShortestPaths to find the shortest path to exit first */
+        ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(mGraph);   
+        ssp.singleSourceDistances(state.currentNode()); 
+
+        // set of Node to that has been visied
+        HashSet<Node> visitedNodes = new HashSet<>(); 
+        
+        /* Ramdomly choose a neighors to start with */
+        Node nextNode = state.currentNode().getNeighbors().iterator().next();
+        /*works but not optimum  .. doScram2(state, nextNode, ssp, visitedNodes); */
+
+        /*** 
+        StringBuilder sb = new StringBuilder();
+        sb.append("best path: \n");
+        for (var edge : ssp.bestPath(state.exit())) {
+            sb.append(edge.source().getId() + "-> " + edge.destination().getId() + " length = " + edge.length() + "\n");
+        }
+
+        String s = sb.toString(); ***/
+        //doSSP(state, ssp.bestPath(state.exit()));
+
+        // Step 1 : we do a depth first graph traversal untill the stepToGo() is about runout
+        // /*RAW BUT WORKING*/ 
+        //doScram3(state, nextNode, ssp, visitedNodes);
+        
+        doScram_Final(state, nextNode, ssp, visitedNodes);
+
+        // Step 2 : now take the shortest path to exit
+        ssp.singleSourceDistances(state.currentNode()); 
+        for(var edge : ssp.bestPath(state.exit())) {
+            state.moveTo(edge.destination());
+        }
+
+    }    
+    private boolean doScram_Final(ScramState state, Node gotoNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){        
+        if (gotoNode.equals(state.exit())){
+            // if happen to step onto 'Exit', then exit no matter what
             return true;
         }
-        visitedNodes.add(currentNode);
 
-        var x = state.allNodes();
-        long currLocationId = state.stepsToGo();
-        for(var visitingNode : state.currentNode().getNeighbors()){
-            if (!visitedNodes.contains(visitingNode)) {
-                state.moveTo(visitingNode);
-                if (exit(state, visitedNodes)) return true;
+        /* Logic explain : 
+         * compare the stepsToGo and the ShortestPath
+         * if StepsAllowed > shortestPath 
+         *  do DFS
+         * otherwise
+         *  do ShortestPath
+         */
+        // get the current best path to 'exit'
+        SPath.singleSourceDistances(state.currentNode()); 
+        var bestPath = SPath.bestPath(state.exit());
+        // Calculate the total steps needs to exit from the best pass
+        long minStepsToExit = 0;
+        for (var path : bestPath){
+            minStepsToExit += path.length;
+        }
+        // add some addition buffer to make sure a sucessful exit
+        minStepsToExit += state.currentNode().getEdge(gotoNode).length;
+        // Calculate the new steps left after the move (New StepsToGo)
+        long newStepsToGo = state.stepsToGo() ; //- state.currentNode().getEdge(gotoNode).length;
+
+        if (newStepsToGo  <= minStepsToExit){ 
+            // If the new stepsToGo will be less than minStepsToExit, we need to get out
+            // So exit the routin now. We don't make a move
+            return true; 
+        }   
+        
+        // move to gotoNode
+        //System.err.println("Node ID = " + gotoNode.getId()+  " Befor .moveTo state.stepsToGo() = " + state.stepsToGo());
+        state.moveTo(gotoNode);
+        //System.err.println("Node ID = " + gotoNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
+
+        // log the node to be 'Visited'
+        visitedNodes.add(gotoNode);
+
+        // do DFS
+        // hasMovedToChild = false;
+        for (var childNode : state.currentNode().getNeighbors()){
+            /* If childNode has not been visited yet, skip 'Exit' since we have more 'stepsToGo()' */
+            if (!visitedNodes.contains(childNode) && childNode!= state.exit()) {
+                //hasMovedToChild = true;
+                if (doScram_Final(state, childNode, SPath, visitedNodes)){
+                    return true; // no more child visiting when graph traverse has reached the limited
+                }
+                /* move to parent such that another child can be visit */
+                if (doScram_Final(state, gotoNode, SPath, visitedNodes)){
+                    return true; 
+                };
             }
         }
-        state.moveTo(currentNode);
+        // if all childNodes are explored, stepback to parentNode 
+        //if (hasMovedToChild)
+        //    return 
+        System.err.println("Node ID = " + gotoNode.getId()+  " E Allowed = " + state.stepsToGo());
         return false;
+        
+        // take ShortestPath route now since bestPath to exit is less than steps allowed now
+        //doSSP(state, bestPath);
+        //return true;
     }
 
+    
+    /**
+     * Depth first graph traverval untill the minStepsToExist is reach 
+     * @param state
+     * @param gotoNode
+     * @param SPath
+     * @param visitedNodes
+     * @return
+     */
+    private boolean doScram3(ScramState state, Node gotoNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){
+        System.err.println("Node ID = " + gotoNode.getId()+  " S Allowed = " + state.stepsToGo());
+        if (gotoNode.equals(state.exit())){
+            // if happen to step into Exit, then exit no matter what
+            return true;
+        }
 
+        /* Logic explain : 
+         * compare the stepsToGo and the ShortestPath
+         * if StepsAllowed > shortestPath 
+         *  do DFS
+         * otherwise
+         *  do ShortestPath
+         */
+        // get the best path to 'exit'
+        SPath.singleSourceDistances(gotoNode); 
+        var bestPath = SPath.bestPath(state.exit());
+
+        String sMsg ="Node ID = " + gotoNode.getId()+  " SSP.Cont() = " + bestPath.size() + " Allowed = " + state.stepsToGo();
+
+        System.err.println(sMsg);
+
+        // count the total steps from the best pass
+        long minStepsToExit = 0;
+        for (var path : bestPath){
+            minStepsToExit += path.length;
+        }
+        long newStepsToGo = state.stepsToGo() + state.currentNode().getEdge(gotoNode).length;
+
+        if (newStepsToGo  <= minStepsToExit){ 
+            // If the new stepsToGo will be greater than minStepsToExit, we won't get out
+            // So exit the routin now. We don't make a move
+            return true; 
+        }   
+        
+        // move to gotoNode
+        //System.err.println("Node ID = " + gotoNode.getId()+  " Befor .moveTo state.stepsToGo() = " + state.stepsToGo());
+        state.moveTo(gotoNode);
+        //System.err.println("Node ID = " + gotoNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
+
+        // log the node to be 'Visited'
+        visitedNodes.add(gotoNode);
+
+        // do DFS
+        // hasMovedToChild = false;
+        for (var childNode : state.currentNode().getNeighbors()){
+            /* If childNode has not been visited yet, skip 'Exit' since we have more 'stepsToGo()' */
+            if (!visitedNodes.contains(childNode) && childNode!= state.exit()) {
+                //hasMovedToChild = true;
+                if (doScram3(state, childNode, SPath, visitedNodes)){
+                    return true; // no more child visiting when graph traverse has reached the limited
+                }
+                /* move to parent such that another child can be visit */
+                if (doScram3(state, gotoNode, SPath, visitedNodes)){
+                    return true; 
+                };
+            }
+        }
+        // if all childNodes are explored, stepback to parentNode 
+        //if (hasMovedToChild)
+        //    return 
+        System.err.println("Node ID = " + gotoNode.getId()+  " E Allowed = " + state.stepsToGo());
+        return false;
+        
+        // take ShortestPath route now since bestPath to exit is less than steps allowed now
+        //doSSP(state, bestPath);
+        //return true;
+    }
+
+    
+    /**
+     * !!! Works !!! but not ideal, still have tons of wasted steps
+     * Depth-first-traversal of Graph until the Graph.stepToGo() == ShortestPath to 'Exit'
+     * @param state
+     * @param gotoNode
+     * @param SPath
+     * @param visitedNodes
+     * @return
+     */
+    private boolean doScram2(ScramState state, Node gotoNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){
+        // move to gotoNode
+        state.moveTo(gotoNode);
+        // log the node to be 'Visited'
+        visitedNodes.add(gotoNode);
+
+        if (gotoNode.equals(state.exit())){
+            // if happen to step into Exit, then exit no matter what
+            return true;
+        }
+
+        /* Logic explain : 
+         * compare the stepsToGo and the ShortestPath
+         * if StepsAllowed > shortestPath 
+         *  do DFS
+         * otherwise
+         *  do ShortestPath
+         */
+        // get the best path to 'exit'
+        SPath.singleSourceDistances(gotoNode); 
+        var bestPath = SPath.bestPath(state.exit());
+
+        if (bestPath.size()<state.stepsToGo()){
+            // do DFS
+            Boolean hasMovedToChild = false;
+            for (var childNode : state.currentNode().getNeighbors()){
+                /* If childNode has not been visited yet, skip 'Exit' since we have more 'stepsToGo()' */
+                if (!visitedNodes.contains(childNode) && childNode!= state.exit()) {
+                    hasMovedToChild = true;
+                    if (doScram2(state, childNode, SPath, visitedNodes)){
+                        return true;
+                    }
+                }
+            }
+            // if all childNodes are explored, stepback to parentNode 
+            if (hasMovedToChild)
+                doScram2(state, gotoNode, SPath, visitedNodes);
+        }
+        
+        // take ShortestPath route now since bestPath to exit is less than steps allowed now
+        doSSP(state, bestPath);
+        return true;
+    }
+
+    private boolean doScram(ScramState state, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){
+        if (state.currentNode()==state.exit()){
+            // if happen to step into Exit, then exit no matter what
+            return true;
+        }
+
+        /* Logic explain : 
+         * compare the stepsToGo and the ShortestPath
+         * if StepsAllowed > shortestPath 
+         *  do DFS
+         * otherwise
+         *  do ShortestPath
+         */
+        // get the best path to 'exit'
+        SPath.singleSourceDistances(state.currentNode()); 
+        var bestPath = SPath.bestPath(state.exit());
+
+        if (bestPath.size()<state.stepsToGo()){
+            // do DFS
+            Node parentNode = state.currentNode();
+            visitedNodes.add(parentNode);
+            for (var nextNode : state.currentNode().getNeighbors()){
+                if (!visitedNodes.contains(nextNode)) {
+                    state.moveTo(nextNode);
+                    //if (bestPath.size()>=state.stepsToGo()) {
+                    //    break;}
+                    if (doScram(state, SPath, visitedNodes)){
+                        return true;
+                    }
+                    state.moveTo(parentNode);
+                    if (bestPath.size()>=state.stepsToGo()) {
+                        break;}
+                    if (doScram(state, SPath, visitedNodes)){
+                        return true;
+                    };
+                }
+            }
+            var i = 1;
+        }
+        
+        // Do ShortestPath route now
+        doSSP(state, bestPath);
+        return true;
+    }
+    private void doSSP(ScramState state, Collection<Edge> SPath){
+        for(var edge : SPath){
+            state.moveTo(edge.destination());
+        }
+    }
 }
