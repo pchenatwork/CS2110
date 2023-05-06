@@ -30,21 +30,56 @@ public class McDiver implements SewerDiver {
         //
         // Use this same process on the second method, scram.
 
-        /****=== Note from PCHEN == **
-        Seems we need to implement some logic HERE ??? Depth First Search ???
-        to find the route from SeekSewer.entrance -> SeekSewer.ring
-        *****/
-        HashSet<Long> visitedLocation = new HashSet<>();        
-        MyStack<Long> myStack = new MyStack<>();
-        MyPQueue pQueue = new MyPQueue<>();
+        HashSet<Long> visitedLocation = new HashSet<>();   
+        // log 'Entrance'  as Visited
+        visitedLocation.add(state.currentLocation());
+        // get the first neighbors to start with
+        Long nextNodeId = state.neighbors().iterator().next().getId();
+        // entering doSeek() recursive function
+        doSeek(state, nextNodeId, visitedLocation);  // Seems the best approach now
+        
+  ////     MyStack<Long> myStack = new MyStack<>();
+      //  MyPQueue pQueue = new MyPQueue<>();
         
         //traverseMaze_v3(state, myStack);
-        traverseMaze_V2(state, visitedLocation, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
+  // v2 is the best working version before doSeek() is trying
+  //      traverseMaze_V2(state, visitedLocation, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
         //traverseMaze_V1(state, visitedLocation, myStack); // Version 1 : IT WORKS
 
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
     }
+    private boolean doSeek(SeekState state, Long nextNodeId, HashSet<Long> visitedSet){		
+        // log the "Visited" node
+        visitedSet.add(nextNodeId); 
+		// move to nextNode
+		state.moveTo(nextNodeId);
+
+        if (state.distanceToRing()==0) {
+            return true;// if ring found, exit routin
+        }
+		/* create a PriorityQueue to store Node-to-be-visited from neighbors. 
+        *  only those not visited "Neighbors" will be queued
+        *  Priority is based on "DistanceToRing", shorter distance has higher priority
+		*/
+        MyPQueue<Long> pQueue = new MyPQueue<>();
+		for ( NodeStatus neighor : state.neighbors()) {                
+			Long neighborId = neighor.getId();
+			if (!visitedSet.contains(neighborId)){
+				double d = neighor.getDistanceToRing();
+				pQueue.add(neighborId, d);
+			}
+		}
+        while (!pQueue.isEmpty()) {
+            // Get the shortest DistanctToRing 'neighbor' to be visited
+			Long neighborId = pQueue.extractMin();
+			if (doSeek(state, neighborId, visitedSet)) {
+				return true; // true == Ring found, exit routin is Ring is found
+            }
+            state.moveTo(nextNodeId); // moved back to root to visit next child neighbor, otherwise illegal move will be thrown
+		}
+		return false; // not found, return false	
+    }	
 
     private boolean traverseMaze_v3(SeekState state, MyStack<Long> visitedStack){
         // not working yet !! 
@@ -293,11 +328,12 @@ public class McDiver implements SewerDiver {
             minStepsToExit += path.length;
         }
         // add some addition buffer to make sure a sucessful exit
-        minStepsToExit += state.currentNode().getEdge(gotoNode).length;
+        minStepsToExit += 15; // state.currentNode().getEdge(gotoNode).length;
         // Calculate the new steps left after the move (New StepsToGo)
-        long newStepsToGo = state.stepsToGo() ; //- state.currentNode().getEdge(gotoNode).length;
+        // add some additional buffer for safty
+        long stepsLeft = state.stepsToGo(); //+ state.currentNode().getEdge(gotoNode).length;
 
-        if (newStepsToGo  <= minStepsToExit){ 
+        if (stepsLeft  <= minStepsToExit){ 
             // If the new stepsToGo will be less than minStepsToExit, we need to get out
             // So exit the routin now. We don't make a move
             return true; 
