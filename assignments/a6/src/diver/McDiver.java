@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.prefs.BackingStoreException;
 
 import datastructures.MyPQueue;
+import datastructures.MyQueue;
 import datastructures.MyStack;
 import game.*;
 import graph.ShortestPaths;
@@ -35,6 +36,8 @@ public class McDiver implements SewerDiver {
         visitedLocation.add(state.currentLocation());
         // get the first neighbors to start with
         Long nextNodeId = state.neighbors().iterator().next().getId();
+   //     doSeek_0508(state, nextNodeId, visitedLocation);
+
         // entering doSeek() recursive function
         doSeek(state, nextNodeId, visitedLocation);  // Seems the best approach now
         
@@ -49,7 +52,79 @@ public class McDiver implements SewerDiver {
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
     }
+
+    /*  *** version 5/8 , Noted attempt to use queue to do Breadth-first-search, but not working !!! *****
+    start using Breadth-first-search. breadth order is based on the Distance-to-ring()
+    */
+    private void doSeek_0508(SeekState state, long nextNodeId, HashSet<Long> visitedSet){		
+        /* Do a breadth-first-traversal(BFS) of the 'graph' based in the distance to ring
+            in order to do the "BFS", a FIFO queue is needed, so use MyQueue() calss.
+            borrow the pseudocode of BFS of an graph from:
+            https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/
+        */
+        MyQueue<Long> queue = new MyQueue<>();
+        
+        System.err.println("Node ID = " + nextNodeId +  " pushed");
+
+        queue.push(nextNodeId);
+
+        while (!queue.isEmpty()){
+            // de-queue the next node from queue
+            var nodeId = queue.pop();
+            System.err.println("Node ID = " + nodeId +  " popped");
+            // only process those not-yet-be-processed
+           // if (!visitedSet.contains(nodeId)){
+                // log the node as "Visited"
+                visitedSet.add(nodeId); 
+                // Make the move
+                state.moveTo(nodeId);
+                if (state.distanceToRing()==0) {
+                    return ;// if ring found, exit routin
+                }
+                /*
+                 * needs to move back to root to visit other neighbors,
+                 *  otherwise java.lang.IllegalArgumentException: moveTo: Node must be adjacent to position
+                 */
+                //state.moveTo(rootId); 
+                // add neighbors-to-be-processed to PriorityQueue ordered by priority (distance to ring)
+                // Closer to Ring will be en-queued first.
+                MyPQueue<Long> pQueue = new MyPQueue<>();
+                for ( NodeStatus neighbor : state.neighbors()) {                
+                    Long neighborId = neighbor.getId();
+                    if (!visitedSet.contains(neighborId)){
+                        double d = neighbor.getDistanceToRing();
+                         System.err.println("   Node ID = " + neighborId +  " enqueue to pQueue. distance = " + d);
+                        pQueue.add(neighborId, d);
+                    }
+                }
+                // de-queue those neighbors-to-be-processd from PriorityQueue to queue
+                if (!pQueue.isEmpty()){
+                    while (!pQueue.isEmpty()){
+                        long x = pQueue.extractMin();
+                        queue.push(x);
+                        System.err.println("Node ID = " + x +  " pushed to queue from pQueue ");
+                        queue.push(state.currentLocation()); // 
+                        System.err.println("Node ID = " + state.currentLocation() +  " pushed to queue from pQueue ");
+                    }
+                    queue.pop(); 
+                }
+           // }
+
+        }
+    }
+    /**
+     * Best up to 5/6/2023, 
+     * @param state
+     * @param nextNodeId
+     * @param visitedSet
+     * @return
+     */
     private boolean doSeek(SeekState state, Long nextNodeId, HashSet<Long> visitedSet){		
+        // If nextNode is already 'seeked', exit routin
+        //if (visitedSet.contains(nextNodeId)) {
+        //    return false;
+        //}            
+
         // log the "Visited" node
         visitedSet.add(nextNodeId); 
 		// move to nextNode
@@ -274,7 +349,7 @@ public class McDiver implements SewerDiver {
         Maze mGraph = new Maze((Set<Node>) state.allNodes());
         /* use the ShortestPaths to find the shortest path to exit first */
         ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(mGraph);   
-        ssp.singleSourceDistances(state.currentNode()); 
+        // ssp.singleSourceDistances(state.currentNode()); 
 
         // set of Node to that has been visied
         HashSet<Node> visitedNodes = new HashSet<>(); 
@@ -297,7 +372,9 @@ public class McDiver implements SewerDiver {
         // /*RAW BUT WORKING*/ 
         //doScram3(state, nextNode, ssp, visitedNodes);
         
-        doScram_Final(state, nextNode, ssp, visitedNodes);
+        // **Best version up to 5/5/ 
+         doScram_Final(state, nextNode, ssp, visitedNodes);
+        //doScram_V0508(state, nextNode, ssp, visitedNodes);
 
         // Step 2 : now take the shortest path to exit
         ssp.singleSourceDistances(state.currentNode()); 
@@ -306,71 +383,188 @@ public class McDiver implements SewerDiver {
         }
 
     }    
-    private boolean doScram_Final(ScramState state, Node gotoNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){        
-        if (gotoNode.equals(state.exit())){
+     /**
+      * V0508, based on doScram_Final (5/5) version, introduce PriorityQueue
+      * @param state
+      * @param nextNode (next node the doScram() will move to)
+      * @param SPath
+      * @param visitedNodes
+      * @return True means the steps is running out
+      */
+    private boolean doScram_V0508(ScramState state, Node nextNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){        
+        // if next step happen to step onto 'Exit', then exit no matter what
+        if (nextNode.equals(state.exit())){            
+            state.moveTo(nextNode);
+            return true;
+        }
+        
+        // get the best path from 'nextNode' to 'exit' node 
+        SPath.singleSourceDistances(nextNode); 
+        var bestPath = SPath.bestPath(state.exit());
+        // Calculate the total steps needs to exit from 'nextNode'
+        long minStepsToExit = 0;
+        for (var edge : bestPath){
+            // edge.length = steps to walk between node
+            minStepsToExit += edge.length;
+        }
+        
+        // Projected Steps left == current steps left - cost (steps) to move to 'nextNode' (edge.length)     
+        long stepsLeft = state.stepsToGo()- state.currentNode().getEdge(nextNode).length;
+
+        // If projected steps left is less than the minStepsToExit, we need to get out. We don't make a move
+        if (stepsLeft  < minStepsToExit){ 
+            return true; 
+        }   
+        
+        // make the move to nextNode
+        // System.err.println("Node ID = " + nextNode.getId()+  " Befor .moveTo state.stepsToGo() = " + state.stepsToGo());
+        System.err.println("Node " + state.currentNode().getId() + "->" + nextNode.getId()+  " state.stepsToGo() = " + state.stepsToGo() + " steps to exit = " + minStepsToExit);
+        state.moveTo(nextNode);
+        //System.err.println("Node ID = " + nextNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
+
+        // log the node been 'Visited'
+        visitedNodes.add(nextNode);
+
+        // do DFS, going to the nearest 'Node' first (this would end up stepping into the most number of 'Node' before start exiting        
+        MyPQueue<Node> pQueue = new MyPQueue<>();
+        for ( Node neighbor : state.currentNode().getNeighbors()) {                 
+            if (!visitedNodes.contains(neighbor) && neighbor!= state.exit()) { 
+                // Only add Not Visisted neighbors, skip 'Exit' for now.
+                // Prioritize the neighbor by Edge.length, shorter length (steps) would visit first
+                double d = state.currentNode().getEdge(neighbor).length; 
+                pQueue.add(neighbor, d);
+            }
+        }
+        
+        while (!pQueue.isEmpty()) {
+            // Get the nearest 'neighbor' to be visited
+			Node neighborNode = pQueue.extractMin();
+            // do the Scram step to 'neighorNode'
+            if (doScram_V0508(state, neighborNode, SPath, visitedNodes)){
+                return true; // no more child visiting when graph traverse has reached the limited
+            }  
+
+            /* Option 1: move to parent such that another child can be visit *
+            if (doScram_V0508(state, nextNode, SPath, visitedNodes)){
+                return true; 
+            };  */
+
+            /* Option 2:
+            *Since move to 'NeighborNode' is already made, new Neighbors to 'neighbor" are exposed
+            * in stead of going back to Parent ( a waste of step)
+            * check to see if there are "new neighbors' that can be visited, if so, doScram(),
+            */
+           
+            for ( Node newNeighbor : state.currentNode().getNeighbors()) {                 
+                if (!visitedNodes.contains(newNeighbor) && newNeighbor!= state.exit()) { 
+                    // Only add Not Visisted neighbors, skip 'Exit' for now.
+                    // Prioritize the neighbor by Edge.length, shorter length (steps) would visit first
+                    if (doScram_V0508(state, newNeighbor, SPath, visitedNodes)){
+                        return true; 
+                    };
+                }
+            }
+            // Since neighbor's neighbor could have been visited, do the shortest path backout to "Root" such that the next neighbor can be visit.
+            SPath.singleSourceDistances(state.currentNode()); 
+            var pathToRoot = SPath.bestPath(nextNode); 
+            for(var edge : pathToRoot) {
+                if (pathToRoot.size() > 1){
+                    var x = 1;
+                }
+                if (doScram_V0508(state, edge.destination(), SPath, visitedNodes)){
+                     return true; 
+                };
+            }
+            /* end of option 2 */
+		}
+        return false;
+    }
+
+    /**
+     * Currently the best version by 5/5
+     * @param state
+     * @param gotoNode
+     * @param SPath
+     * @param visitedNodes
+     * @return
+     */
+    private boolean doScram_Final(ScramState state, Node nextNode, ShortestPaths<Node, Edge> SPath, HashSet<Node> visitedNodes ){  
+        
+        System.err.println("Entering doScram() :  Node ID = " + nextNode.getId());      
+
+        if (nextNode.equals(state.exit())){
             // if happen to step onto 'Exit', then exit no matter what
             return true;
         }
 
         /* Logic explain : 
-         * compare the stepsToGo and the ShortestPath
-         * if StepsAllowed > shortestPath 
-         *  do DFS
-         * otherwise
-         *  do ShortestPath
+         doScram_Final() will do depth-first-traversal (skiping Exit node) untill steps allowed exhausted
          */
-        // get the current best path to 'exit'
-        SPath.singleSourceDistances(state.currentNode()); 
-        var bestPath = SPath.bestPath(state.exit());
-        // Calculate the total steps needs to exit from the best pass
-        long minStepsToExit = 0;
-        for (var path : bestPath){
-            minStepsToExit += path.length;
-        }
-        // add some addition buffer to make sure a sucessful exit
-        minStepsToExit += 15; // state.currentNode().getEdge(gotoNode).length;
-        // Calculate the new steps left after the move (New StepsToGo)
-        // add some additional buffer for safty
-        long stepsLeft = state.stepsToGo(); //+ state.currentNode().getEdge(gotoNode).length;
+        
+        //??  if nextNode already been visited, can we exits immediately ?? with false
+       // if (visitedNodes.contains(nextNode)) {
+         //   System.err.println("Exit since Node ID = " + nextNode.getId() + " already visited");
+         //   return false;
+        //}  
 
-        if (stepsLeft  <= minStepsToExit){ 
-            // If the new stepsToGo will be less than minStepsToExit, we need to get out
-            // So exit the routin now. We don't make a move
-            return true; 
+        // get the best path from 'nextNode' to 'exit' node 
+        SPath.singleSourceDistances(nextNode); 
+        var bestPath = SPath.bestPath(state.exit());
+        // Calculate the total steps needs to exit from 'nextNode'
+        long minStepsToExit = 0;
+        for (var edge : bestPath){
+            // edge.length = steps to walk between node
+            minStepsToExit += edge.length;
+        }
+        
+        // Projected Steps left == current steps left - cost (steps) to move to 'nextNode' (edge.length)     
+        long stepsLeft = state.stepsToGo()- state.currentNode().getEdge(nextNode).length;
+
+        // If projected steps left is less than the minStepsToExit, we need to get out. We don't make a move
+        if (stepsLeft  < minStepsToExit){ 
+            return true; // get out
         }   
         
-        // move to gotoNode
-        //System.err.println("Node ID = " + gotoNode.getId()+  " Befor .moveTo state.stepsToGo() = " + state.stepsToGo());
-        state.moveTo(gotoNode);
-        //System.err.println("Node ID = " + gotoNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
+        // move to nextNode
+        System.err.println("MoveTo Node ID = " + nextNode.getId());
+
+        state.moveTo(nextNode);
+        //System.err.println("Node ID = " + nextNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
 
         // log the node to be 'Visited'
-        visitedNodes.add(gotoNode);
+        visitedNodes.add(nextNode);
 
-        // do DFS
-        // hasMovedToChild = false;
-        for (var childNode : state.currentNode().getNeighbors()){
-            /* If childNode has not been visited yet, skip 'Exit' since we have more 'stepsToGo()' */
-            if (!visitedNodes.contains(childNode) && childNode!= state.exit()) {
-                //hasMovedToChild = true;
-                if (doScram_Final(state, childNode, SPath, visitedNodes)){
-                    return true; // no more child visiting when graph traverse has reached the limited
-                }
-                /* move to parent such that another child can be visit */
-                if (doScram_Final(state, gotoNode, SPath, visitedNodes)){
-                    return true; 
-                };
+        // do DFS, going to the nearest 'Node' first (this should end up stepping into the most 'Node' before the steps exhausted
+        MyPQueue<Node> pQueue = new MyPQueue<>();
+        for ( Node neighbor : state.currentNode().getNeighbors()) {                 
+            if (!visitedNodes.contains(neighbor) && neighbor!= state.exit()) { 
+                // Only add Not Visisted neighbors, skip 'Exit' for now.
+                // Prioritize the neighbor by Edge.length, shorter length (steps) would visit first
+                double d = state.currentNode().getEdge(neighbor).length; 
+                pQueue.add(neighbor, d);
+                System.err.println(" Node ID = " + nextNode.getId() + " en-queue neighbor " + neighbor.getId() + " distance=" + d);
             }
         }
-        // if all childNodes are explored, stepback to parentNode 
-        //if (hasMovedToChild)
-        //    return 
-        System.err.println("Node ID = " + gotoNode.getId()+  " E Allowed = " + state.stepsToGo());
+        while (!pQueue.isEmpty()) {
+            // Get the nearest 'neighbor' to be visited
+			Node neighborNode = pQueue.extractMin();
+            System.err.println(" Node ID = " + nextNode.getId() + " de-queue neighbor " + neighborNode.getId() + " and doScram()");
+            // do the Scram step to 'neighorNode'
+            if (doScram_Final(state, neighborNode, SPath, visitedNodes)){
+                return true; // no more child visiting when graph traverse has reached the limited
+            }  
+            /* move back to parent such that another child can be visit, otherwise illegal move exception will be thrown * */
+            System.err.println(" Node ID = " + nextNode.getId() + " move back since all neighbors are visited");
+            // force a stepback
+          //?? ** state.moveTo(nextNode);
+            if (doScram_Final(state, nextNode, SPath, visitedNodes)){
+                return true; 
+            }; 
+        }
+
+        // if all childNodes are explored, stepback to parentNode; false means more explore is OK
+        // System.err.println("Node ID = " + nextNode.getId()+  " E Allowed = " + state.stepsToGo());
         return false;
-        
-        // take ShortestPath route now since bestPath to exit is less than steps allowed now
-        //doSSP(state, bestPath);
-        //return true;
     }
 
     
