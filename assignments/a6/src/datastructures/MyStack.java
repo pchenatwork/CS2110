@@ -3,7 +3,7 @@ package datastructures;
  //* ============ Notes: PCHEN ===========
  // A Linked-list stack (FILO)
  // Introduce to track the current 'route' that has taken in the game board from Entrance
- // push(), pop(), peek(), isEmpty() are exposed
+ // push(), pop(), peek(), isEmpty(), exists(), size() are exposed
  //* ======================================
  
 public class MyStack<T> {
@@ -53,5 +53,24 @@ public class MyStack<T> {
         if (_head!=null) return _head.data();
         return null;
     }
-    public boolean isEmpty(){return _size==0;}    
+    public boolean isEmpty(){return _size==0;}   
+    /**
+     * Check to see if an element is in the Stack
+     * 
+     * @param v
+     * @return true if the element is in the Stack
+     */ 
+    public boolean exists(T v) {
+        var node = _head;
+        while(node != null){{
+            if (node.data().equals(v)){
+                return true;
+            }
+            node = node.next();
+        }}
+        return false;
+    }
+    public int size(){
+        return _size;
+    }
 }

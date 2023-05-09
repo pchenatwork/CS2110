@@ -248,7 +248,40 @@ public class McDiver implements SewerDiver {
             *  starts a new doScramming() routin from that un-visited node
             */ 
             Node backofNode = visitedStack.pop();
-            System.err.println("Step back from Node " + state.currentNode().getId() + " to " + backofNode.getId());  
+
+            /*
+            // *** Experiments a shortcut logic : Idea explained: *** not fully tested yet ****
+            // Thrown this :  java.lang.IllegalArgumentException: getEdge: Node must be a neighbor of this Node
+            // before make the move to backofNode, see if there are others in the Stack that is neighbor to current node
+            // if so. move to that node instead 
+            // eg. current node = <0>
+                backoff stack : 1->2->3->4->5->6
+                if <0> is also adjence to <6>, instead of backoff to <1> then <2> ... then <6>,
+                take shortcut to back off to <6>
+                This is an effort to take shortcut for more steps to explore
+            */
+            Boolean bShortCutFound = false;
+            System.err.println("Step back from Node " + state.currentNode().getId() + " to " + backofNode.getId()); 
+            for (var n : state.currentNode().getNeighbors()){
+                if (visitedStack.exists(n)){
+                    System.err.println("Neighbor " + n.getId() + " also exists in Stack.");
+                    // Pop Stack until that 'n' pop out
+                    // and use that 'n' as backoffNode. this is to take a short-cut
+                    for(int i = 0; i<visitedStack.size(); i++){
+                        var v = visitedStack.pop();
+                        System.err.println("Popping Node " + v.getId() + " from Stack for taking short-cut");
+                        if (v==n) {
+                            bShortCutFound = true;
+                            backofNode = v;
+                            System.err.println("Step back from Node " + state.currentNode().getId() + " shortcut to " + backofNode.getId()); 
+                            break;
+                        }
+                    }
+                }
+                if (bShortCutFound) break;
+            }
+            /* **** end of experiments **** */
+ 
             
             // Check if backoff will exhaust the StepsToGo, If so exit the routin without making the move.
             if (isStepsExhausted(state, backofNode, SPath)){
