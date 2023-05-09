@@ -8,6 +8,7 @@ import java.util.prefs.BackingStoreException;
 import datastructures.MyPQueue;
 import datastructures.MyQueue;
 import datastructures.MyStack;
+import datastructures.SlowPQueue;
 import game.*;
 import graph.ShortestPaths;
 
@@ -41,13 +42,13 @@ public class McDiver implements SewerDiver {
         // entering doSeek() recursive function
         doSeek(state, nextNodeId, visitedLocation);  // Seems the best approach now
         
-  ////     MyStack<Long> myStack = new MyStack<>();
+     //  MyStack<Long> myStack = new MyStack<>();
       //  MyPQueue pQueue = new MyPQueue<>();
         
         //traverseMaze_v3(state, myStack);
   // v2 is the best working version before doSeek() is trying
   //      traverseMaze_V2(state, visitedLocation, myStack);  // Version 2:  add a PriorityQueue to the logic, better than traverseMaze_V1() but sill not the best
-        //traverseMaze_V1(state, visitedLocation, myStack); // Version 1 : IT WORKS
+  //      traverseMaze_V1(state, visitedLocation, myStack); // Version 1 : IT WORKS
 
         //traversePreOrder(state, visited);        
         //traversePreOrder(state);
@@ -119,20 +120,23 @@ public class McDiver implements SewerDiver {
      * @param visitedSet
      * @return
      */
-    private boolean doSeek(SeekState state, Long nextNodeId, HashSet<Long> visitedSet){		
-        // If nextNode is already 'seeked', exit routin
-        //if (visitedSet.contains(nextNodeId)) {
-        //    return false;
-        //}            
-
-        // log the "Visited" node
-        visitedSet.add(nextNodeId); 
+    private boolean doSeek(SeekState state, Long nextNodeId, HashSet<Long> visitedSet){	
 		// move to nextNode
 		state.moveTo(nextNodeId);
 
         if (state.distanceToRing()==0) {
-            return true;// if ring found, exit routin
-        }
+            return true;// if ring found, exit routin with 'True'
+        }       
+        
+        /* If nextNode is already 'seeked', assuming all its neighbors were already 'Visited', 
+            exit routin with 'False'. No need to evaluate its neighbors
+        */
+        if (visitedSet.contains(nextNodeId)) {
+            return false;
+        }   
+        // log the "Visited" node
+        visitedSet.add(nextNodeId); 
+
 		/* create a PriorityQueue to store Node-to-be-visited from neighbors. 
         *  only those not visited "Neighbors" will be queued
         *  Priority is based on "DistanceToRing", shorter distance has higher priority
@@ -499,13 +503,7 @@ public class McDiver implements SewerDiver {
 
         /* Logic explain : 
          doScram_Final() will do depth-first-traversal (skiping Exit node) untill steps allowed exhausted
-         */
-        
-        //??  if nextNode already been visited, can we exits immediately ?? with false
-       // if (visitedNodes.contains(nextNode)) {
-         //   System.err.println("Exit since Node ID = " + nextNode.getId() + " already visited");
-         //   return false;
-        //}  
+         */        
 
         // get the best path from 'nextNode' to 'exit' node 
         SPath.singleSourceDistances(nextNode); 
@@ -517,7 +515,7 @@ public class McDiver implements SewerDiver {
             minStepsToExit += edge.length;
         }
         
-        // Projected Steps left == current steps left - cost (steps) to move to 'nextNode' (edge.length)     
+        // Projected Steps left == current steps left - cost (steps) to move to 'nextNode' (edge.length)   
         long stepsLeft = state.stepsToGo()- state.currentNode().getEdge(nextNode).length;
 
         // If projected steps left is less than the minStepsToExit, we need to get out. We don't make a move
@@ -531,11 +529,20 @@ public class McDiver implements SewerDiver {
         state.moveTo(nextNode);
         //System.err.println("Node ID = " + nextNode.getId()+  " After .moveTo state.stepsToGo() = " + state.stepsToGo());
 
+        // if 'nextNode' already visited, no need to go over its Neighbors, just exist with 'False' 
+        // just to increase performance
+        if (visitedNodes.contains(nextNode)) {
+            return false;
+        }
+
         // log the node to be 'Visited'
         visitedNodes.add(nextNode);
 
         // do DFS, going to the nearest 'Node' first (this should end up stepping into the most 'Node' before the steps exhausted
+        // Using "My Priority Queue"
         MyPQueue<Node> pQueue = new MyPQueue<>();
+        // *Using provied Slow Priority Queue. It will work also.*
+        // SlowPQueue<Node> pQueue = new SlowPQueue<>();
         for ( Node neighbor : state.currentNode().getNeighbors()) {                 
             if (!visitedNodes.contains(neighbor) && neighbor!= state.exit()) { 
                 // Only add Not Visisted neighbors, skip 'Exit' for now.
@@ -545,9 +552,11 @@ public class McDiver implements SewerDiver {
                 System.err.println(" Node ID = " + nextNode.getId() + " en-queue neighbor " + neighbor.getId() + " distance=" + d);
             }
         }
+
         while (!pQueue.isEmpty()) {
-            // Get the nearest 'neighbor' to be visited
+            // Get the nearest 'neighbor' to be visited from PriorityQueue
 			Node neighborNode = pQueue.extractMin();
+            // Print info for debugging
             System.err.println(" Node ID = " + nextNode.getId() + " de-queue neighbor " + neighborNode.getId() + " and doScram()");
             // do the Scram step to 'neighorNode'
             if (doScram_Final(state, neighborNode, SPath, visitedNodes)){
@@ -555,15 +564,18 @@ public class McDiver implements SewerDiver {
             }  
             /* move back to parent such that another child can be visit, otherwise illegal move exception will be thrown * */
             System.err.println(" Node ID = " + nextNode.getId() + " move back since all neighbors are visited");
-            // force a stepback
-          //?? ** state.moveTo(nextNode);
+            /* force a stepback to neighborNode's root , which is 'nextNode', 
+              otherwise will it will cause a illegal move exception when move to next neighborNode
+            */
             if (doScram_Final(state, nextNode, SPath, visitedNodes)){
                 return true; 
             }; 
         }
 
-        // if all childNodes are explored, stepback to parentNode; false means more explore is OK
-        // System.err.println("Node ID = " + nextNode.getId()+  " E Allowed = " + state.stepsToGo());
+        // Print info for debugging
+        System.err.println("Node ID = " + nextNode.getId()+  " Exit doScram() false. Steps allowed = " + state.stepsToGo());
+
+        // when reach here, all childNodes are explored, return false,  means more explore is OK
         return false;
     }
 
