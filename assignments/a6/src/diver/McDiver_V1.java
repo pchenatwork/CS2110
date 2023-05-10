@@ -15,7 +15,7 @@ import graph.ShortestPaths;
 
 /** This is the place for your implementation of the {@code SewerDiver}.
  */
-public class McDiver_ implements SewerDiver {
+public class McDiver_V1 implements SewerDiver {
 
     /** See {@code SewerDriver} for specification. */
     @Override
@@ -546,10 +546,11 @@ public class McDiver_ implements SewerDiver {
         for ( Node neighbor : state.currentNode().getNeighbors()) {                 
             if (!visitedNodes.contains(neighbor) && neighbor!= state.exit()) { 
                 // Only add Not Visisted neighbors, skip 'Exit' for now.
-                // Prioritize the neighbor by Edge.length, shorter length (steps) would visit first
-                double d = state.currentNode().getEdge(neighbor).length; 
+                // Prioritize the neighbor by Coins, More will get visited first, so need to convert "more" to a smaller number in priority
+                ///double d = neighbor.getTile().coins() * -1; // state.currentNode().getEdge(neighbor).length; 
+                double d = neighbor.getTile().coins() / state.currentNode().getEdge(neighbor).length * -1;  // coins per step as priority
                 pQueue.add(neighbor, d);
-                System.err.println(" Node ID = " + nextNode.getId() + " en-queue neighbor " + neighbor.getId() + " distance=" + d);
+                System.err.println(" Node ID = " + nextNode.getId() + " en-queue neighbor " + neighbor.getId() + " coins/step =" + (d * -1));
             }
         }
 
@@ -563,7 +564,7 @@ public class McDiver_ implements SewerDiver {
                 return true; // no more child visiting when graph traverse has reached the limited
             }  
             /* move back to parent such that another child can be visit, otherwise illegal move exception will be thrown * */
-            System.err.println(" Node ID = " + nextNode.getId() + " move back since all neighbors are visited");
+            System.err.println(" Move back to node = " + nextNode.getId() + " since all neighbors are visited");
             /* force a stepback to neighborNode's root , which is 'nextNode', 
               otherwise will it will cause a illegal move exception when move to next neighborNode
             */
