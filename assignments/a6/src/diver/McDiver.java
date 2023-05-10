@@ -233,16 +233,22 @@ public class McDiver implements SewerDiver {
         // *Using provied Slow Priority Queue. It will work also.*
         // SlowPQueue<Node> pQueue = new SlowPQueue<>();
         for ( Node neighbor : state.currentNode().getNeighbors()) {  
+            /* If neighbor has coins , add them according to Coins Per Step
+             otherwise add them prioritized by steps
+             */
+            if (neighbor.getTile().coins()>0){
+                double p = neighbor.getTile().coins() / state.currentNode().getEdge(neighbor).length * -1;  // Negitive higher will get pick first
+                pQueue.add(neighbor, p);
+                // Log the neighbor Node as "QUEUED"
+                visitedNodes.put(neighbor.getId(), VISITED_STATUS.QUEUED); 
+            } else 
             // Only Not-Yet-Visited neighbors will be added, and skip 'Exit' node               
             if (!visitedNodes.containsKey(neighbor.getId()) && neighbor!= state.exit()) { 
                 // Prioritize the neighbor by Coins, More Coins will get visited first, so need to convert "more" to a smaller number in priority
                 //double d = neighbor.getTile().coins() * -1; // state.currentNode().getEdge(neighbor).length;                 
                 
-                double d = neighbor.getTile().coins() / state.currentNode().getEdge(neighbor).length * -1;  // coins per step as priority
-                
+                double d = state.currentNode().getEdge(neighbor).length; // Steps to neighbor, shorter steps will have higher priority             
                 pQueue.add(neighbor, d);
-                // Debugging trace log
-                System.err.println("  Neighbor en-queued Id = " + neighbor.getId() + " coins/step =" + (d * -1));
                 // Log the neighbor Node as "QUEUED"
                 visitedNodes.put(neighbor.getId(), VISITED_STATUS.QUEUED); 
             }
