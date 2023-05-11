@@ -1,6 +1,6 @@
 package diver;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
 
 import datastructures.MyPQueue;
@@ -13,21 +13,25 @@ import graph.ShortestPaths;
 
  /* =======================
   * This is my final submission-ready version, with all comments
-  * Version 05/11/2023
-  * Changed from last version McDiver_0510,
-  * better and simplier logic to skip a already 'Visited' node
   * =======================
   */
 
-public class McDiver implements SewerDiver {
-
+public class McDiver_0510 implements SewerDiver {
+    /**
+     * Status of Node.
+     * QUEUED: Node has been touched, and queued for processing
+     * CHECKED : Node and all its neighbors have been recursively checked
+     */
+    public enum VISITED_STATUS {
+        QUEUED, CHECKED
+    }
     /** See {@code SewerDriver} for specification. */
     @Override
     public void seek(SeekState state) {
         // To log the visited nodes,  1: This node been queued; 2: This node has been looked at
-        HashSet<Long> visitedNodes = new HashSet<>();   
+        HashMap<Long, VISITED_STATUS> visitedNodes = new HashMap<>();   
         // log 'Entrance' as  "CHECKED"
-        visitedNodes.add(state.currentLocation());
+        visitedNodes.put(state.currentLocation(), VISITED_STATUS.CHECKED );
         // get the first neighbor as the Next Node to start with
         Long nextNodeId = state.neighbors().iterator().next().getId();
         // entering doSeek() recursive function
@@ -41,7 +45,7 @@ public class McDiver implements SewerDiver {
      * @param visitedSet : a Map records all the Node that have been 'Visited', and their Visited_status
      * @return True/False: Ring found
      */
-    private boolean doSeek(SeekState state, Long nextNodeId, HashSet<Long> visitedSet){	
+    private boolean doSeek(SeekState state, Long nextNodeId, HashMap<Long, VISITED_STATUS> visitedSet){	
 		// debugging trace log
         System.err.println("doSeek() begin : current = " + state.currentLocation() + " moveTo " + nextNodeId);
 		
@@ -53,9 +57,18 @@ public class McDiver implements SewerDiver {
             System.err.println("doSeek() exit : current = " + state.currentLocation() + " Ring Found");
             return true;
         }
+        
+        /* If nextNode is already 'CHECKED', assuming all its neighbors were already 'Visited', 
+            exit routin with 'False'. Skip evaluating its neighbors
+            An effort to speed up performance
+        */
+        if (visitedSet.get(nextNodeId) == VISITED_STATUS.CHECKED) {
+            System.err.println("doSeek() exit false : current = " + state.currentLocation() + " " + nextNodeId + " already CHECKED");
+            return false;
+        }   
 
-        // log the node as "Visited" node
-        visitedSet.add(nextNodeId);
+        // log the node as "CHECKED" node
+        visitedSet.put(nextNodeId, VISITED_STATUS.CHECKED);
 
 		/* create a PriorityQueue to store Node-to-be-visited from neighbors. 
         *  only those not visited "Neighbors" will be queued
@@ -64,39 +77,61 @@ public class McDiver implements SewerDiver {
         MyPQueue<Long> pQueue = new MyPQueue<>();
 		for ( NodeStatus neighor : state.neighbors()) {                
 			Long neighborId = neighor.getId();
-			if (!visitedSet.contains(neighborId)){
+			if (!visitedSet.containsKey(neighborId)){
 				double d = neighor.getDistanceToRing();
                 // Queue the neighborId to PriorityQueue for processing
 				pQueue.add(neighborId, d);
+                // Log 'neighborId' as "Queued" (Not 'CHECKED') such that the neighborId won't get pick up
+                // from other adjacent nodes
+                visitedSet.put(neighborId, VISITED_STATUS.QUEUED);
                 // debugging trace log
                 System.err.println("doSeek() : current = " + state.currentLocation() + " neighbor " + neighborId + " queued");                
 			}
 		}
         while (!pQueue.isEmpty()) {
-            // Get the next 'neighbor' to be visited from PriorityQueue
+            // Get the shortest DistanctToRing 'neighbor' to be visited from PriorityQueue
 			Long neighborId = pQueue.extractMin();
             // debugging trace log
-            System.err.println("doSeek() : current = " + state.currentLocation() + " next visit " + neighborId );
+            System.err.println("doSeek() : current = " + state.currentLocation() + " call doSeek() on " + neighborId );
 
-            // Skip the queued 'Neighbor' if it is already 'Visited'
-            if (!visitedSet.contains(neighborId)){
-                
-                // debugging trace log
-                System.err.println("doSeek() : current = " + state.currentLocation() + " call doSeek() on " + neighborId );
-
+            // Skip the queued 'Neighbor' if it is already 'CHECKED'
+            if (!visitedSet.get(neighborId).equals(VISITED_STATUS.CHECKED)){
                 // When Neighbor has not been "CHECKED" yet
-                // do the next Seek step, exit the whole recursive if True (ring found)
+                // do the next Seek step, return routin if return True (ring found)
                 if (doSeek(state, neighborId, visitedSet)) return true;
-
-                // debugging trace log
-                System.err.println("doSeek() : current = " + state.currentLocation() + " move back to " + nextNodeId );
-
                 // Step back to "Root (nextNodeId)" for next neighbor visiting
-                state.moveTo(nextNodeId);
-            } else {
-                // debugging trace log
-                System.err.println("doSeek() : current = " + state.currentLocation() + " skiped " + neighborId + " because it is been visited" );
+                state.moveTo(neighborId);
             }
+
+			// recursively call doSeek() with new neighborId
+            if (!visitedSet.get(neighborId).equals(VISITED_STATUS.CHECKED) && doSeek(state, neighborId, visitedSet)) {
+				return true; // true == Ring found, exit routin is Ring is found
+            }
+            // debugging trace log
+            System.err.println("doSeek() : current = " + state.currentLocation() + " move back to " + nextNodeId );
+           
+            /* ========= Experiment ==================
+             * Check to see if any neighbors are queued but not CHECKED, if so, take the short-cut
+             * =======================================
+             * !!! NOT WORKING !!!
+             * ======================================
+            
+            for (var neighbor : state.neighbors()){
+                var neighborStatus = visitedSet.get(neighbor.getId());
+                if (neighborStatus!=null && neighborStatus == VISITED_STATUS.QUEUED) {
+                    System.err.println("doSeek() : current = " + state.currentLocation() + " move back change to " + nextNodeId );
+                    nextNodeId = neighbor.getId();
+                    break;
+                }
+            }             
+            /* ========= Experiment ================== */
+
+            // Every time a move to neighorId was made, we need to moved back to "root"
+            // We can not jump from the first neighbor right to next one
+            // ** here 'nextNodeId' is the parent to all neighborId **
+            //if (doSeek(state, nextNodeId, visitedSet)) {
+			//	return true; // true == Ring found, exit routin is Ring is found
+            //}
 		}
 		return false; // not found, return false	
     }	
@@ -112,15 +147,15 @@ public class McDiver implements SewerDiver {
         Maze mGraph = new Maze((Set<Node>) state.allNodes());
 
         /* Create a 'ShortestPaths' object from the Maze graph*
-            this is to be used in the method to calculate the shortest path to 'exit' */
+            this is to be used in the method to calculate the shortest path to exit */
         ShortestPaths<Node, Edge> ssp = new ShortestPaths<>(mGraph);  
 
         /* to LOG the nodes that have been ' Visited '
             A node's VISITED_STATUS can be "QUEUED" Or "CHECKED"
         */
-        HashSet<Long> visitedNodes = new HashSet<>(); 
-        // Log CurrentNode to be 'Visited'
-        visitedNodes.add(state.currentNode().getId());
+        HashMap<Long, VISITED_STATUS> visitedNodes = new HashMap<>(); 
+        // Log CurrentNode to be 'CHECKED'
+        visitedNodes.put(state.currentNode().getId(), VISITED_STATUS.CHECKED);
         
         /* Ramdomly choose a neighors to start with */
         Node nextNode = state.currentNode().getNeighbors().iterator().next();
@@ -143,21 +178,20 @@ public class McDiver implements SewerDiver {
      * @param visitedNodes : a Map records all the Node that have been 'Visited', and their Visited_status
      * @return True: When the ScramState.StepsToGo() is running out
      */
-    private boolean doScram(ScramState state, Node nextNode, ShortestPaths<Node, Edge> SPath, Set<Long> visitedNodes ){  
+    private boolean doScram(ScramState state, Node nextNode, ShortestPaths<Node, Edge> SPath, HashMap<Long, VISITED_STATUS> visitedNodes ){  
         
         System.err.println("doScram() Start : Current = " + state.currentNode().getId() + " to Node = " + nextNode.getId());      
 
         if (nextNode.equals(state.exit())){
-            // if happen to step onto 'Exit', then exit no matter what, 
-            // This shouldn't happen, but leave it anyway
+            // if happen to step onto 'Exit', then exit no matter what
             return true;
         }
 
         /* Logic explain : 
-         doScram() will do depth-first-traversal (skiping Exit node) until steps-allowed exhausted
+         doScram() will do depth-first-traversal (skiping Exit node) untill steps allowed exhausted
          */        
 
-        /* ** To evaluate the Steps-allowed ** */
+        /* ** To evaluate the Steps ** */
          // get the best path from 'nextNode' to 'exit' node 
         SPath.singleSourceDistances(nextNode); 
         var bestPath = SPath.bestPath(state.exit());
@@ -186,8 +220,21 @@ public class McDiver implements SewerDiver {
         // move to nextNode
         state.moveTo(nextNode);
 
-        // log the node's status as "Visited"
-        visitedNodes.add(nextNode.getId());
+        // if 'nextNode' already CHECKED, no need to go over its Neighbors again, just exist with 'False' 
+        // just to increase performance
+
+        if (visitedNodes.get(nextNode.getId()) == VISITED_STATUS.CHECKED) {
+            // debugging trace log
+            System.err.println("Node " + nextNode.getId() + " is already CHECKED, can we return here?? ");
+            /**************
+            Note : seems this will cut the execution short. ended early than anticipated, so comment out *
+            ***************
+                return false;
+            *******************/
+        }
+
+        // log the node's status as "CHECKED
+        visitedNodes.put(nextNode.getId(), VISITED_STATUS.CHECKED);
 
         // do Depth-First by visiting "neighbor" recurssively until an end
         // Using a PriorityQueue to store the 'Neighbors' to be visited, Prioritize by 'Coins'
@@ -197,19 +244,23 @@ public class McDiver implements SewerDiver {
         // SlowPQueue<Node> pQueue = new SlowPQueue<>();
         for ( Node neighbor : state.currentNode().getNeighbors()) {  
             /* If neighbor has coins , add them according to Coins Per Step
-                otherwise add them prioritized by steps
+             otherwise add them prioritized by steps
              */
             if (neighbor.getTile().coins()>0){
                 double p = neighbor.getTile().coins() / state.currentNode().getEdge(neighbor).length * -1;  // Negitive higher will get pick first
                 pQueue.add(neighbor, p);
+                // Log the neighbor Node as "QUEUED"
+                visitedNodes.put(neighbor.getId(), VISITED_STATUS.QUEUED); 
             } else 
             // Only Not-Yet-Visited neighbors will be added, and skip 'Exit' node               
-            if (!visitedNodes.contains(neighbor.getId()) && neighbor!= state.exit()) { 
+            if (!visitedNodes.containsKey(neighbor.getId()) && neighbor!= state.exit()) { 
                 // Prioritize the neighbor by Coins, More Coins will get visited first, so need to convert "more" to a smaller number in priority
                 //double d = neighbor.getTile().coins() * -1; // state.currentNode().getEdge(neighbor).length;                 
                 
                 double d = state.currentNode().getEdge(neighbor).length; // Steps to neighbor, shorter steps will have higher priority             
                 pQueue.add(neighbor, d);
+                // Log the neighbor Node as "QUEUED"
+                visitedNodes.put(neighbor.getId(), VISITED_STATUS.QUEUED); 
             }
         }
 
@@ -218,25 +269,19 @@ public class McDiver implements SewerDiver {
             // Get the nearest 'neighbor' to be visited from PriorityQueue
 			Node neighborNode = pQueue.extractMin();
             // Print info for debugging
-            System.err.println("  Neighbor ID = " + neighborNode.getId() + " is de-queued for doScram()");
-
-            if (!visitedNodes.contains(neighborNode.getId())) {
-                // do the Scram step to 'neighorNode'
-                if (doScram(state, neighborNode, SPath, visitedNodes)){
-                    return true; // no more child visiting when graph traverse has reached the limited
-                }  
-                /* force a stepback to neighbor's root , which is 'nextNode', 
-                    we can not jump from one 'neighbor' right to another, otherwise a illegal move exception will be thrown
-                ** Since with every move, we need to evaluate the stepsLeft and stepsToGetOut, so doScram() is called **
-                */
-                System.err.println(" Move back to node = " + nextNode.getId() + " since its neighbor " + neighborNode.getId() + " was just visited");
-                if (doScram(state, nextNode, SPath, visitedNodes)){
-                    return true; 
-                }; 
-            } else {
-                // Print info for debugging
-                System.err.println(" Neighbor ID = " + neighborNode.getId() + " is already visited, skip doScram()");
-            }
+            System.err.println("  Neighbor ID = " + neighborNode.getId() + " is de-queued and call doScram()");
+            // do the Scram step to 'neighorNode'
+            if (doScram(state, neighborNode, SPath, visitedNodes)){
+                return true; // no more child visiting when graph traverse has reached the limited
+            }  
+            /* force a stepback to neighbor's root , which is 'nextNode', 
+                we can not jump from one 'neighbor' right to another, otherwise a illegal move exception will be thrown
+            ** Since with every move, we need to evaluate the stepsLeft and stepsToGetOut, so doScram() is called **
+            */
+            System.err.println(" Move back to node = " + nextNode.getId() + " since its neighbor " + neighborNode.getId() + " was just CHECKED");
+            if (doScram(state, nextNode, SPath, visitedNodes)){
+                return true; 
+            }; 
         }
 
         // Print info for debugging
